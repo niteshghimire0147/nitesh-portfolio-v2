@@ -1,0 +1,6 @@
+Contact: mailto:ghimirenitesh8@gmail.com
+Preferred-Languages: en
+Policy: https://niteshghimire.dev/security-disclosure
+Acknowledgments: https://niteshghimire.dev/#hall-of-fame
+Encryption: https://niteshghimire.dev/pgp
+Expires: 2027-04-19T00:00:00.000Z

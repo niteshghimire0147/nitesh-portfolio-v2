@@ -1,0 +1,260 @@
+# ══════════════════════════════════════════════════════════════════════════════
+#  .gitignore — Nitesh Ghimire Portfolio
+#  Reviewed from: Senior Developer + Senior Pentester perspective
+#  Rule: if it contains a secret, credential, or leaks system info → ignore it
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+# ── 1. ENVIRONMENT & SECRETS (NEVER commit these) ─────────────────────────────
+# Any .env file leaks DB URIs, JWT secrets, API keys, email passwords
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.test
+.env.preview
+**/.env
+**/.env.*
+!**/.env.example          # .example files are safe — they have no real values
+
+# ── 2. ADMIN PATH (CRITICAL — leaks hidden CMS URL) ──────────────────────────
+# VITE_RP contains the encoded admin panel path. If committed, the "hidden"
+# admin URL is exposed to anyone who reads the repo.
+frontend/.env
+backend/.env
+
+
+# ── 3. DEPENDENCIES ───────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+.pnp/
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+
+# ── 4. BUILD OUTPUTS ──────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.output/
+.vite/
+frontend/dist/
+frontend/build/
+frontend/out/
+storybook-static/
+
+
+# ── 5. LOGS (can contain IPs, usernames, tokens, stack traces) ────────────────
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+backend/logs/
+
+
+# ── 6. SSL / TLS CERTIFICATES & PRIVATE KEYS ─────────────────────────────────
+*.pem
+*.key
+*.crt
+*.cert
+*.cer
+*.der
+*.p12
+*.p8
+*.pfx
+*.jks
+*.keystore
+*.truststore
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+authorized_keys
+known_hosts
+*.ppk                     # PuTTY private keys
+
+
+# ── 7. DATABASE DUMPS & EXPORTS (contain real user data) ─────────────────────
+dump/
+mongodump/
+mongoexport/
+*.bson
+*.dump
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+*.mdb
+*.accdb
+database_backup/
+db_backup/
+
+
+# ── 8. API CLIENT FILES (reveal full API structure + endpoints) ───────────────
+# Postman / Insomnia / Bruno collections with real URLs or auth tokens
+postman_collection.json
+postman_environment.json
+*postman*.json
+insomnia_*.json
+*.insomnia
+.bruno/
+bruno.json
+*.har                     # HTTP Archive — may contain session tokens & responses
+
+
+# ── 9. SECURITY RESEARCH / PENTEST ARTIFACTS ─────────────────────────────────
+# Never commit scan results or exploit scripts to a public portfolio repo
+*.nessus
+*.nmap
+nmap*.xml
+*.pcap
+*.pcapng
+*.cap
+*.nmaprun
+wordlists/
+*.wordlist
+*.lst
+recon/
+loot/
+exploit/
+payload/
+shells/
+.msf4/
+metasploit/
+
+
+# ── 10. CLOUD & SERVICE CREDENTIALS ──────────────────────────────────────────
+# Google / Firebase / AWS / Azure service account keys
+*service_account*.json
+*serviceaccount*.json
+firebase*.json
+!firebase.json            # firebase.json (project config) is safe, credentials are not
+*credentials*.json
+*credential*.json
+google-services.json
+GoogleService-Info.plist
+.aws/
+.azure/
+.gcloud/
+*.mobileprovision
+*.provisionprofile
+
+
+# ── 11. PROCESS / RUNTIME FILES ───────────────────────────────────────────────
+*.pid
+*.seed
+*.pid.lock
+.pm2/
+pids/
+
+
+# ── 12. COVERAGE & TEST REPORTS (may embed source paths or tokens) ────────────
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+junit*.xml
+
+
+# ── 13. SOURCE MAPS (reconstructs original source for attackers) ──────────────
+*.map
+dist/**/*.map
+build/**/*.map
+frontend/dist/**/*.map
+
+
+# ── 14. UPLOADS (user-submitted content) ─────────────────────────────────────
+uploads/
+backend/uploads/
+public/uploads/
+
+
+# ── 15. OS & SYSTEM FILES ─────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Thumbs.db:encryptable
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+# ── 16. EDITOR & IDE FILES ────────────────────────────────────────────────────
+# (can contain local paths, workspace tokens, extension data)
+.vscode/
+!.vscode/extensions.json  # sharing recommended extensions is fine
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+.cursor/
+.windsurf/
+.zed/
+*.swp
+*.swo
+*.swn
+*~
+.editorconfig             # optional: remove if you want to share formatting rules
+
+
+# ── 17. TEMP & CACHE FILES ────────────────────────────────────────────────────
+tmp/
+temp/
+.tmp/
+.temp/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tgz
+*.gz
+*.zip
+*.tar
+
+
+# ── 18. MISC SENSITIVE PATTERNS ───────────────────────────────────────────────
+*.secret
+*.secrets
+secrets/
+.secrets
+private/
+confidential/
+*.bak
+*.backup
+*.orig                    # git conflict originals — may contain old secrets
+*.patch                   # patches can reveal internal architecture
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  WHAT IS INTENTIONALLY COMMITTED (safe to be public):
+#  ✅ Source code (.js, .jsx, .css)
+#  ✅ package.json + package-lock.json (dependency manifest)
+#  ✅ .env.example files (template with no real values)
+#  ✅ README.md, docs
+#  ✅ vite.config.js, tailwind.config.js, postcss.config.js
+#  ✅ public/ static assets (robots.txt, favicon, og-image.png)
+#  ✅ .well-known/security.txt (intentionally public)
+# ══════════════════════════════════════════════════════════════════════════════

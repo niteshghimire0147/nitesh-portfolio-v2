@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0a0e1a;
+    color: #e2e8f0;
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #060810; }
+  ::-webkit-scrollbar-thumb { background: #00d4ff44; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00d4ff88; }
+
+  ::selection { background: #00d4ff33; color: #00d4ff; }
+}
+
+@layer components {
+  /* ── Glow effects ──────────────────────────────────── */
+  .glow-text {
+    text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px #0066ff;
+  }
+
+  .glow-border {
+    border: 1px solid #00d4ff44;
+    box-shadow: 0 0 12px #00d4ff18, inset 0 0 12px #00d4ff08;
+  }
+
+  .glow-border:hover {
+    border-color: #00d4ff88;
+    box-shadow: 0 0 20px #00d4ff33, inset 0 0 20px #00d4ff11;
+  }
+
+  /* ── Buttons ────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 font-mono font-medium text-sm
+           rounded border border-primary text-primary bg-transparent
+           hover:bg-primary hover:text-dark
+           transition-all duration-300 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 font-mono font-medium text-sm
+           rounded border border-border text-gray-400
+           hover:border-primary hover:text-primary
+           transition-all duration-300 cursor-pointer;
+  }
+
+  /* ── Cards ──────────────────────────────────────────── */
+  .card {
+    @apply bg-card border border-border rounded-lg p-6 transition-all duration-300;
+  }
+
+  .card:hover {
+    border-color: #00d4ff33;
+    box-shadow: 0 0 20px #00d4ff0a;
+  }
+
+  /* ── Typography ─────────────────────────────────────── */
+  .section-title {
+    @apply font-display text-3xl md:text-4xl font-bold mb-2 text-primary;
+    text-shadow: 0 0 20px #00d4ff33;
+  }
+
+  .section-subtitle {
+    @apply font-mono text-xs text-gray-600 mb-12 tracking-wider;
+  }
+
+  /* ── Nav ────────────────────────────────────────────── */
+  .nav-link {
+    @apply font-mono text-xs text-gray-400 hover:text-primary transition-colors duration-200 tracking-wider;
+  }
+
+  /* ── Tags / Badges ──────────────────────────────────── */
+  .tag {
+    @apply px-3 py-1 text-xs font-mono rounded
+           border border-primary/30 text-primary/80 bg-primary/5;
+  }
+
+  /* ── Inputs ─────────────────────────────────────────── */
+  .input {
+    @apply w-full bg-darker border border-border rounded px-4 py-3
+           font-mono text-sm text-gray-300 placeholder-gray-600
+           focus:border-primary focus:outline-none transition-colors duration-200;
+  }
+
+  /* ── Backgrounds ────────────────────────────────────── */
+  .cyber-grid {
+    background-image:
+      linear-gradient(#00d4ff07 1px, transparent 1px),
+      linear-gradient(90deg, #00d4ff07 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* ── Difficulty badges ──────────────────────────────── */
+  .badge-easy    { @apply px-2 py-0.5 text-xs font-mono rounded border text-green-400  border-green-400/30  bg-green-400/5;  }
+  .badge-medium  { @apply px-2 py-0.5 text-xs font-mono rounded border text-yellow-400 border-yellow-400/30 bg-yellow-400/5; }
+  .badge-hard    { @apply px-2 py-0.5 text-xs font-mono rounded border text-red-400    border-red-400/30    bg-red-400/5;    }
+  .badge-insane  { @apply px-2 py-0.5 text-xs font-mono rounded border text-purple-400 border-purple-400/30 bg-purple-400/5; }
+
+  /* ── Terminal cursor ────────────────────────────────── */
+  .cursor-blink::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
+    color: #00d4ff;
+    margin-left: 1px;
+  }
+}
+
+/* ── Scanline overlay ───────────────────────────────────── */
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00d4ff22, transparent);
+  animation: scan 4s linear infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Markdown prose overrides ───────────────────────────── */
+.prose-dark h1, .prose-dark h2, .prose-dark h3 { color: #00d4ff; font-family: 'Orbitron', sans-serif; margin-top: 1.5em; }
+.prose-dark p  { color: #cbd5e1; line-height: 1.8; margin-bottom: 1em; }
+.prose-dark code { color: #00d4ff; background: #0d1526; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.875em; }
+.prose-dark pre  { background: #060810 !important; border: 1px solid #1a2a4a; border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1.5em 0; }
+.prose-dark pre code { background: transparent; padding: 0; color: #e2e8f0; }
+.prose-dark ul, .prose-dark ol { color: #cbd5e1; padding-left: 1.5em; margin-bottom: 1em; }
+.prose-dark li { margin-bottom: 0.4em; }
+.prose-dark a  { color: #00d4ff; text-decoration: underline; }
+.prose-dark blockquote { border-left: 3px solid #00d4ff44; padding-left: 1em; color: #6b7280; font-style: italic; margin: 1em 0; }
+.prose-dark hr { border-color: #1a2a4a; margin: 2em 0; }
+.prose-dark strong { color: #f1f5f9; }
+.prose-dark table { width: 100%; border-collapse: collapse; margin: 1.5em 0; }
+.prose-dark th { background: #0d1526; color: #00d4ff; padding: 0.75em; text-align: left; border: 1px solid #1a2a4a; font-family: 'JetBrains Mono', monospace; font-size: 0.8em; }
+.prose-dark td { padding: 0.75em; border: 1px solid #1a2a4a; color: #cbd5e1; font-size: 0.875em; }

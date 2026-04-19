@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+Allow: /ctf
+Allow: /ctf/
+Allow: /security-disclosure
+Allow: /pgp
+
+Disallow: /api/
+
+Sitemap: https://niteshghimire.dev/sitemap.xml
