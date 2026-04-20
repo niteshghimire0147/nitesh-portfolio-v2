@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FiGithub, FiLinkedin, FiChevronDown, FiDownload } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiChevronDown, FiDownload, FiShield } from 'react-icons/fi';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 
 const ROLES = [
   'Penetration Tester',
@@ -10,6 +11,8 @@ const ROLES = [
 ];
 
 export default function HeroSection() {
+  const { config } = useSiteConfig();
+  const { github, linkedin, hackthebox } = config.contact;
   const [roleIdx, setRoleIdx] = useState(0);
   const [text, setText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -91,22 +94,21 @@ export default function HeroSection() {
           >
             <FiDownload size={15} /> Resume
           </a>
-          <a
-            href="https://github.com/niteshghimire0147"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-ghost gap-2"
-          >
-            <FiGithub size={15} /> GitHub
-          </a>
-          <a
-            href="https://www.linkedin.com/in/nitesh-ghimire-694104382/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-ghost gap-2"
-          >
-            <FiLinkedin size={15} /> LinkedIn
-          </a>
+          {github && (
+            <a href={github} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
+              <FiGithub size={15} /> GitHub
+            </a>
+          )}
+          {linkedin && (
+            <a href={linkedin} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
+              <FiLinkedin size={15} /> LinkedIn
+            </a>
+          )}
+          {hackthebox && (
+            <a href={hackthebox} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
+              <FiShield size={15} /> HackTheBox
+            </a>
+          )}
         </div>
 
         {/* Stats */}

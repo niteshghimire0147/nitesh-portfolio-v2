@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiMail, FiGithub, FiLinkedin, FiPhone, FiMapPin, FiSend } from 'react-icons/fi';
+import { FiMail, FiGithub, FiLinkedin, FiPhone, FiMapPin, FiSend, FiShield } from 'react-icons/fi';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { useSiteConfig } from '../../context/SiteConfigContext';
@@ -38,6 +38,7 @@ export default function ContactSection() {
   const socialLinks = [
     { icon: FiGithub,   href: c.github },
     { icon: FiLinkedin, href: c.linkedin },
+    { icon: FiShield,   href: c.hackthebox },
     { icon: FiMail,     href: `mailto:${c.email}` },
   ].filter(s => s.href);
 

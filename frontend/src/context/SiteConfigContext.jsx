@@ -91,11 +91,12 @@ export const DEFAULT_CONFIG = {
     },
   },
   contact: {
-    email:    'ghimirenitesh8@gmail.com',
-    phone:    '+977 97xxxxxxx',
-    location: 'Bhaktapur, Sallaghari, Nepal',
-    github:   'https://github.com/niteshghimire0147',
-    linkedin: 'https://www.linkedin.com/in/nitesh-ghimire-694104382/',
+    email:      'ghimirenitesh8@gmail.com',
+    phone:      '+977 97xxxxxxx',
+    location:   'Bhaktapur, Sallaghari, Nepal',
+    github:     'https://github.com/niteshghimire0147',
+    linkedin:   'https://www.linkedin.com/in/nitesh-ghimire-694104382/',
+    hackthebox: 'https://profile.hackthebox.com/profile/019d6386-7801-7191-8629-88d729367f74',
   },
   customNews: [],
   hallOfFame: {

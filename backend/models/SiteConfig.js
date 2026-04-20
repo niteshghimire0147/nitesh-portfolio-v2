@@ -46,11 +46,12 @@ const siteConfigSchema = new mongoose.Schema(
       },
     },
     contact: {
-      email:    String,
-      phone:    String,
-      location: String,
-      github:   String,
-      linkedin: String,
+      email:      String,
+      phone:      String,
+      location:   String,
+      github:     String,
+      linkedin:   String,
+      hackthebox: String,
     },
     customNews: [{
       title:       String,
