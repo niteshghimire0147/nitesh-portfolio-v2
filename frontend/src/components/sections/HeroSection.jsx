@@ -12,7 +12,7 @@ const ROLES = [
 
 export default function HeroSection() {
   const { config } = useSiteConfig();
-  const { github, linkedin } = config.contact;
+  const { github, linkedin, hackthebox, tryhackme } = config.contact;
   const [roleIdx, setRoleIdx] = useState(0);
   const [text, setText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -122,35 +122,39 @@ export default function HeroSection() {
 
         {/* HTB / THM badges */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-          <a
-            href="https://tryhackme.com/p/niteshghimire"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded border font-mono text-xs transition-all hover:scale-105"
-            style={{ borderColor: '#00d4ff33', background: '#0d152688', color: '#8892a4' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#00d4ff88'; e.currentTarget.style.color = '#00d4ff'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#00d4ff33'; e.currentTarget.style.color = '#8892a4'; }}
-          >
-            <img
-              src="https://tryhackme-badges.s3.amazonaws.com/niteshghimire.png"
-              alt="TryHackMe"
-              style={{ height: '20px', borderRadius: '2px' }}
-              onError={e => { e.currentTarget.style.display = 'none'; }}
-            />
-            <span>TryHackMe Profile</span>
-          </a>
-          <a
-            href="https://app.hackthebox.com/profile/niteshghimire"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded border font-mono text-xs transition-all hover:scale-105"
-            style={{ borderColor: '#9fef0033', background: '#0d152688', color: '#8892a4' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#9fef0088'; e.currentTarget.style.color = '#9fef00'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#9fef0033'; e.currentTarget.style.color = '#8892a4'; }}
-          >
-            <span style={{ color: '#9fef00', fontSize: '16px' }}>⬡</span>
-            <span>HackTheBox Profile</span>
-          </a>
+          {tryhackme && (
+            <a
+              href={tryhackme}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded border font-mono text-xs transition-all hover:scale-105"
+              style={{ borderColor: '#00d4ff33', background: '#0d152688', color: '#8892a4' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#00d4ff88'; e.currentTarget.style.color = '#00d4ff'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#00d4ff33'; e.currentTarget.style.color = '#8892a4'; }}
+            >
+              <img
+                src="https://tryhackme-badges.s3.amazonaws.com/niteshghimire.png"
+                alt="TryHackMe"
+                style={{ height: '20px', borderRadius: '2px' }}
+                onError={e => { e.currentTarget.style.display = 'none'; }}
+              />
+              <span>TryHackMe Profile</span>
+            </a>
+          )}
+          {hackthebox && (
+            <a
+              href={hackthebox}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded border font-mono text-xs transition-all hover:scale-105"
+              style={{ borderColor: '#9fef0033', background: '#0d152688', color: '#8892a4' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#9fef0088'; e.currentTarget.style.color = '#9fef00'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#9fef0033'; e.currentTarget.style.color = '#8892a4'; }}
+            >
+              <span style={{ color: '#9fef00', fontSize: '16px' }}>⬡</span>
+              <span>HackTheBox Profile</span>
+            </a>
+          )}
         </div>
 
         {/* Scroll hint */}
