@@ -16,7 +16,8 @@ export default function BlogList() {
 
   useEffect(() => {
     api.get('/blogs')
-      .then((r) => setBlogs(r.data.blogs || []))
+      .then((r) => setBlogs(Array.isArray(r.data?.blogs) ? r.data.blogs : []))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

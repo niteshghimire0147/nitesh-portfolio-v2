@@ -22,7 +22,7 @@ export default function ProjectsSection() {
 
   useEffect(() => {
     api.get('/projects').then((r) => {
-      if (r.data.length) setProjects([...r.data, ...STATIC]);
+      if (Array.isArray(r.data) && r.data.length) setProjects([...r.data, ...STATIC]);
     }).catch(() => {});
   }, []);
 

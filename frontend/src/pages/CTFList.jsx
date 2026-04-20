@@ -19,7 +19,8 @@ export default function CTFList() {
 
   useEffect(() => {
     api.get('/ctf')
-      .then((r) => setCtfs(r.data?.ctfs ?? []))
+      .then((r) => setCtfs(Array.isArray(r.data?.ctfs) ? r.data.ctfs : []))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

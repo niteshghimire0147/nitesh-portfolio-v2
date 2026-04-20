@@ -16,7 +16,7 @@ export default function AdminBlogs() {
   const [editing, setEditing] = useState(null); // _id or null
   const [loading, setLoading] = useState(false);
 
-  const load = () => api.get('/blogs/admin/all').then((r) => setBlogs(r.data)).catch(() => {});
+  const load = () => api.get('/blogs/admin/all').then((r) => setBlogs(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   useEffect(() => { load(); }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

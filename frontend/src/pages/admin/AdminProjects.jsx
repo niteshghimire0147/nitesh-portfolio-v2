@@ -12,7 +12,7 @@ export default function AdminProjects() {
   const [editing,  setEditing]  = useState(null);
   const [loading,  setLoading]  = useState(false);
 
-  const load = () => api.get('/projects').then((r) => setProjects(r.data)).catch(() => {});
+  const load = () => api.get('/projects').then((r) => setProjects(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   useEffect(() => { load(); }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

@@ -47,7 +47,7 @@ export default function NewsSection() {
   };
 
   useEffect(() => {
-    if (customNews.length > 0) {
+    if (Array.isArray(customNews) && customNews.length > 0) {
       setNews(customNews.map(normalise));
       setUsingCustom(true);
     } else {

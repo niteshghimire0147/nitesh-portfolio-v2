@@ -156,7 +156,7 @@ export default function TestimonialsSection() {
   const [loading,   setLoading]   = useState(false);
 
   useEffect(() => {
-    api.get('/testimonials').then((r) => setList(r.data)).catch(() => {});
+    api.get('/testimonials').then((r) => setList(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   }, []);
 
   const handleChange = (e) => {

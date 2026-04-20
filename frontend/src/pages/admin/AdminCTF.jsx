@@ -16,7 +16,7 @@ export default function AdminCTF() {
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const load = () => api.get('/ctf/admin/all').then((r) => setItems(r.data)).catch(() => {});
+  const load = () => api.get('/ctf/admin/all').then((r) => setItems(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   useEffect(() => { load(); }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

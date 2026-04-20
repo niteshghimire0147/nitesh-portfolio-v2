@@ -165,7 +165,7 @@ function merge(api, def) {
       achievement: { ...def.certifications.achievement, ...api.certifications?.achievement },
     },
     contact:    { ...def.contact, ...api.contact },
-    customNews: api.customNews || [],
+    customNews: Array.isArray(api.customNews) ? api.customNews : [],
     hallOfFame: {
       cves:        api.hallOfFame?.cves?.length        ? api.hallOfFame.cves        : def.hallOfFame.cves,
       bugBounty:   api.hallOfFame?.bugBounty?.length   ? api.hallOfFame.bugBounty   : def.hallOfFame.bugBounty,

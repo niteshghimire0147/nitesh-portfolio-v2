@@ -54,7 +54,7 @@ export default function AboutSection() {
               </p>
             ))}
 
-            {(a.highlights || []).length > 0 && (
+            {Array.isArray(a.highlights) && a.highlights.length > 0 && (
               <div className="grid grid-cols-3 gap-4 pt-4">
                 {a.highlights.map((item) => (
                   <div key={item.title} className="card flex flex-col items-center text-center gap-2 py-5">

@@ -10,7 +10,7 @@ export default function AdminTestimonials() {
 
   const load = () =>
     api.get('/testimonials/admin/all')
-      .then((r) => setItems(r.data))
+      .then((r) => setItems(Array.isArray(r.data) ? r.data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
 
