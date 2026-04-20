@@ -27,10 +27,9 @@
     <meta name="twitter:description" content="Senior pentester from Nepal — CVEs, bug bounties, CTF write-ups, and purple team operations." />
     <meta name="twitter:image"       content="https://niteshghimire.dev/og-image.png" />
 
-    <!-- Security headers (backup to server-side) -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options"        content="DENY" />
-    <meta http-equiv="Referrer-Policy"        content="strict-origin-when-cross-origin" />
+    <!-- X-Content-Type-Options and X-Frame-Options must be HTTP headers (set by backend Helmet) -->
+    <!-- Referrer-Policy as meta is valid and supported -->
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
 
     <!-- Allow indexing of the portfolio (but not admin paths — handled server-side) -->
     <meta name="robots" content="index, follow" />
