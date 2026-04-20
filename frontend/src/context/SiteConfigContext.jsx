@@ -97,6 +97,7 @@ export const DEFAULT_CONFIG = {
     github:     'https://github.com/niteshghimire0147',
     linkedin:   'https://www.linkedin.com/in/nitesh-ghimire-694104382/',
     hackthebox: 'https://profile.hackthebox.com/profile/019d6386-7801-7191-8629-88d729367f74',
+    tryhackme:  'https://tryhackme.com/p/niteshghimire',
   },
   customNews: [],
   hallOfFame: {

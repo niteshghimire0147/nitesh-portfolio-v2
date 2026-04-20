@@ -52,6 +52,7 @@ const siteConfigSchema = new mongoose.Schema(
       github:     String,
       linkedin:   String,
       hackthebox: String,
+      tryhackme:  String,
     },
     customNews: [{
       title:       String,

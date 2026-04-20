@@ -405,6 +405,7 @@ function ContactTab({ data, setData, onSave, saving }) {
         <Field label="github"     value={data.github}     onChange={set('github')}     type="url" />
         <Field label="linkedin"   value={data.linkedin}   onChange={set('linkedin')}   type="url" />
         <Field label="hackthebox" value={data.hackthebox || ''} onChange={set('hackthebox')} type="url" placeholder="https://profile.hackthebox.com/profile/..." />
+        <Field label="tryhackme"  value={data.tryhackme  || ''} onChange={set('tryhackme')}  type="url" placeholder="https://tryhackme.com/p/username" />
       </div>
       <div className="flex justify-end pt-4 border-t border-border">
         <SaveBtn saving={saving} onClick={onSave} />

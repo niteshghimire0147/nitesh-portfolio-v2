@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiGithub, FiLinkedin, FiChevronDown, FiDownload, FiShield } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiChevronDown, FiDownload } from 'react-icons/fi';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 
 const ROLES = [
@@ -12,7 +12,7 @@ const ROLES = [
 
 export default function HeroSection() {
   const { config } = useSiteConfig();
-  const { github, linkedin, hackthebox } = config.contact;
+  const { github, linkedin } = config.contact;
   const [roleIdx, setRoleIdx] = useState(0);
   const [text, setText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -102,11 +102,6 @@ export default function HeroSection() {
           {linkedin && (
             <a href={linkedin} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
               <FiLinkedin size={15} /> LinkedIn
-            </a>
-          )}
-          {hackthebox && (
-            <a href={hackthebox} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
-              <FiShield size={15} /> HackTheBox
             </a>
           )}
         </div>
