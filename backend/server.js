@@ -136,7 +136,9 @@ app.use(cors({
       'http://localhost:5173',
       'http://localhost:3000',
     ].filter(Boolean);
-    if (!origin || allowed.includes(origin)) return cb(null, true);
+    // LiteSpeed proxy can duplicate the Origin header — take first value only
+    const firstOrigin = (origin || '').split(',')[0].trim();
+    if (!firstOrigin || allowed.includes(firstOrigin)) return cb(null, true);
     process.stderr.write(`[CORS blocked] origin: ${origin}\n`);
     cb(new Error('CORS: origin not allowed'));
   },
