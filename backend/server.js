@@ -128,12 +128,16 @@ app.use(
 
 app.use(cors({
   origin: (origin, cb) => {
-    const isProd = process.env.NODE_ENV === 'production';
-    const allowed = isProd
-      ? [process.env.CLIENT_URL].filter(Boolean)
-      : ['http://localhost:5173', 'http://localhost:3000'];
-    // Allow same-origin / no-origin (SSR, health checks)
+    const base = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+    const allowed = [
+      base,
+      'https://niteshg.com.np',
+      'http://niteshg.com.np',
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ].filter(Boolean);
     if (!origin || allowed.includes(origin)) return cb(null, true);
+    process.stderr.write(`[CORS blocked] origin: ${origin}\n`);
     cb(new Error('CORS: origin not allowed'));
   },
   credentials: true,
