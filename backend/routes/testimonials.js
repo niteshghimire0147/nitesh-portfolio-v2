@@ -1,7 +1,8 @@
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import Testimonial from '../models/Testimonial.js';
-import { protect } from '../middleware/auth.js';
+import express      from 'express';
+import mongoose      from 'mongoose';
+import rateLimit     from 'express-rate-limit';
+import Testimonial   from '../models/Testimonial.js';
+import { protect }   from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -123,6 +124,8 @@ router.get('/admin/all', protect, async (_req, res) => {
 
 // ── PUT /api/testimonials/:id/approve  — (protected) ─────────────────────
 router.put('/:id/approve', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const t = await Testimonial.findByIdAndUpdate(
       req.params.id,
@@ -138,6 +141,8 @@ router.put('/:id/approve', protect, async (req, res) => {
 
 // ── DELETE /api/testimonials/:id  — (protected) ───────────────────────────
 router.delete('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     await Testimonial.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });

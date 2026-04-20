@@ -31,9 +31,16 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Input exceeds maximum length' });
     }
 
+    // Basic email format validation
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
     // Sanitize headers (prevent injection via CRLF)
     const safeName    = safeHeader(name);
     const safeSubject = safeHeader(subject);
+    const safeEmail   = safeHeader(email);
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -45,7 +52,7 @@ router.post('/', async (req, res) => {
 
     await transporter.sendMail({
       from:    { name: safeName, address: process.env.EMAIL_USER },
-      replyTo: email,
+      replyTo: safeEmail,
       to:      process.env.EMAIL_USER,
       subject: safeSubject
         ? `[Portfolio] ${safeSubject}`

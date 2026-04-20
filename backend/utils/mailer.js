@@ -25,7 +25,7 @@ export async function sendSecurityAlert(subject, details) {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
-      subject: `[SECURITY ALERT] ${subject}`,
+      subject: `[SECURITY ALERT] ${String(subject).replace(/[\r\n]/g, ' ').trim()}`,
       html,
     });
   } catch (err) {

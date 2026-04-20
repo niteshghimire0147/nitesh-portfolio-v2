@@ -1,5 +1,6 @@
-import express from 'express';
-import Project from '../models/Project.js';
+import express    from 'express';
+import mongoose    from 'mongoose';
+import Project     from '../models/Project.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -54,6 +55,8 @@ router.post('/', protect, async (req, res) => {
 
 // PUT /api/projects/:id
 router.put('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const project = await Project.findByIdAndUpdate(req.params.id, pickProjectFields(req.body), {
       new: true,
@@ -68,6 +71,8 @@ router.put('/:id', protect, async (req, res) => {
 
 // DELETE /api/projects/:id  (soft delete)
 router.delete('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const project = await Project.findByIdAndUpdate(
       req.params.id,

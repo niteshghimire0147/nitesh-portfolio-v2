@@ -1,6 +1,7 @@
-import express   from 'express';
-import rateLimit  from 'express-rate-limit';
-import Blog       from '../models/Blog.js';
+import express    from 'express';
+import mongoose    from 'mongoose';
+import rateLimit   from 'express-rate-limit';
+import Blog        from '../models/Blog.js';
 import { protect } from '../middleware/auth.js';
 
 const listLimiter = rateLimit({
@@ -121,6 +122,8 @@ router.post('/', protect, async (req, res) => {
 
 // PUT /api/blogs/:id
 router.put('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const fields = pickBlogFields(req.body);
     if (fields.slug) fields.slug = sanitizeSlug(fields.slug);
@@ -140,6 +143,8 @@ router.put('/:id', protect, async (req, res) => {
 
 // DELETE /api/blogs/:id  (soft delete)
 router.delete('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,

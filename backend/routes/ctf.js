@@ -1,4 +1,5 @@
 import express    from 'express';
+import mongoose    from 'mongoose';
 import rateLimit   from 'express-rate-limit';
 import CTF         from '../models/CTF.js';
 import { protect } from '../middleware/auth.js';
@@ -98,6 +99,8 @@ router.post('/', protect, async (req, res) => {
 
 // PUT /api/ctf/:id
 router.put('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const fields = pickCTFFields(req.body);
     if (fields.slug) fields.slug = sanitizeSlug(fields.slug);
@@ -117,6 +120,8 @@ router.put('/:id', protect, async (req, res) => {
 
 // DELETE /api/ctf/:id  (soft delete)
 router.delete('/:id', protect, async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id))
+    return res.status(400).json({ message: 'Invalid ID' });
   try {
     const ctf = await CTF.findByIdAndUpdate(
       req.params.id,
