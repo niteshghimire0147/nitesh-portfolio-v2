@@ -48,6 +48,17 @@ export default function AboutSection() {
 
           {/* Bio */}
           <div className="space-y-5">
+            {/* Profile Image */}
+            <div className="flex justify-center mb-2">
+              <div className="relative w-40 h-40 rounded-full overflow-hidden glow-border ring-2 ring-primary/30">
+                <img
+                  src="/nitesh.png"
+                  alt="Nitesh Ghimire"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            </div>
+
             {(a.bio || []).map((para, i) => (
               <p key={i} className="font-body text-lg text-gray-400 leading-relaxed">
                 {para}
