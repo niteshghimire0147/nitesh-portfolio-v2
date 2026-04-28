@@ -37,8 +37,8 @@ function sanitizeSlug(raw) {
 }
 
 function pickBlogFields(body) {
-  const { title, slug, excerpt, content, tags, category, published } = body;
-  return { title, slug, excerpt, content, tags, category, published };
+  const { title, slug, excerpt, content, tags, category, published, pdfUrl } = body;
+  return { title, slug, excerpt, content, tags, category, published, pdfUrl };
 }
 
 // ─── Public ──────────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 
 import authRoutes        from './routes/auth.js';
+import uploadRoutes      from './routes/upload.js';
 import blogRoutes        from './routes/blog.js';
 import ctfRoutes         from './routes/ctf.js';
 import projectRoutes     from './routes/projects.js';
@@ -184,6 +185,7 @@ app.use('/uploads', express.static('uploads', { index: false }));
 // loginLimiter must be registered BEFORE the auth router so it actually fires
 app.use('/api/auth/login',   loginLimiter);
 app.use('/api/auth',         authRoutes);
+app.use('/api/upload',       uploadRoutes);
 app.use('/api/blogs',        blogRoutes);
 app.use('/api/ctf',          ctfRoutes);
 app.use('/api/projects',     projectRoutes);

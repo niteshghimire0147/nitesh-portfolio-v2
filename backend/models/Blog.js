@@ -10,6 +10,7 @@ const blogSchema = new mongoose.Schema(
     category:  { type: String, default: 'General', trim: true, index: true },
     published: { type: Boolean, default: false, index: true },
     views:     { type: Number, default: 0 },
+    pdfUrl:    { type: String, default: null },
     deleted:   { type: Boolean, default: false, index: true },
     deletedAt: { type: Date, default: null },
   },

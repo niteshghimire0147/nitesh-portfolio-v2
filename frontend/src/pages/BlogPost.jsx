@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
-import { FiArrowLeft, FiCalendar, FiEye, FiTag, FiClock } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiEye, FiTag, FiClock, FiDownload } from 'react-icons/fi';
 import api from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
 
@@ -104,6 +104,20 @@ export default function BlogPost() {
             ))}
           </div>
         </div>
+
+        {blog.pdfUrl && (
+          <a
+            href={blog.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2.5 border border-primary/40
+                       bg-primary/5 text-primary font-mono text-xs rounded hover:bg-primary/10
+                       transition-colors"
+          >
+            <FiDownload size={13} /> Download PDF
+          </a>
+        )}
 
         <div className="card prose-dark">
           <ReactMarkdown

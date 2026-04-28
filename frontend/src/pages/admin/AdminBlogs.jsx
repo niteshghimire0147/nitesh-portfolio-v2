@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react';
-import { FiEdit2, FiTrash2, FiEye, FiEyeOff, FiPlus } from 'react-icons/fi';
+import { useState, useEffect, useRef } from 'react';
+import { FiEdit2, FiTrash2, FiEye, FiEyeOff, FiPaperclip, FiX, FiDownload } from 'react-icons/fi';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
-const EMPTY = { title: '', slug: '', excerpt: '', content: '', tags: '', category: 'General', published: false };
+const EMPTY = { title: '', slug: '', excerpt: '', content: '', tags: '', category: 'General', published: false, pdfUrl: '' };
 
 function slugify(str) {
   return str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
 }
 
 export default function AdminBlogs() {
-  const [blogs,   setBlogs]   = useState([]);
-  const [form,    setForm]    = useState(EMPTY);
-  const [editing, setEditing] = useState(null); // _id or null
-  const [loading, setLoading] = useState(false);
+  const [blogs,       setBlogs]       = useState([]);
+  const [form,        setForm]        = useState(EMPTY);
+  const [editing,     setEditing]     = useState(null);
+  const [loading,     setLoading]     = useState(false);
+  const [pdfFile,     setPdfFile]     = useState(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const load = () => api.get('/blogs/admin/all').then((r) => setBlogs(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   useEffect(() => { load(); }, []);
@@ -28,17 +31,50 @@ export default function AdminBlogs() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const cancelEdit = () => { setEditing(null); setForm(EMPTY); };
+  const cancelEdit = () => { setEditing(null); setForm(EMPTY); setPdfFile(null); };
+
+  const handlePdfSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('PDF must be under 10 MB.');
+      return;
+    }
+    setPdfFile(file);
+  };
+
+  const removePdf = () => {
+    setPdfFile(null);
+    setForm((f) => ({ ...f, pdfUrl: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const payload = {
-      ...form,
-      slug: form.slug ? form.slug : slugify(form.title),
-      tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
-    };
     try {
+      let finalPdfUrl = form.pdfUrl;
+
+      if (pdfFile) {
+        setPdfUploading(true);
+        const fd = new FormData();
+        fd.append('pdf', pdfFile);
+        const r = await api.post('/upload/pdf', fd);
+        finalPdfUrl = r.data.url;
+        setPdfUploading(false);
+      }
+
+      const payload = {
+        ...form,
+        pdfUrl: finalPdfUrl,
+        slug: form.slug ? form.slug : slugify(form.title),
+        tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      };
+
       if (editing) {
         await api.put(`/blogs/${editing}`, payload);
         toast.success('Post updated!');
@@ -49,6 +85,7 @@ export default function AdminBlogs() {
       cancelEdit();
       load();
     } catch (err) {
+      setPdfUploading(false);
       toast.error(err.response?.data?.message || 'Error saving post');
     } finally {
       setLoading(false);
@@ -115,14 +152,58 @@ export default function AdminBlogs() {
             />
           </div>
 
+          {/* PDF Upload */}
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">$</span> attach PDF (optional, max 10 MB)
+            </label>
+            {(form.pdfUrl && !pdfFile) ? (
+              <div className="flex items-center gap-3 p-3 border border-border rounded bg-card">
+                <FiPaperclip size={14} className="text-primary flex-shrink-0" />
+                <a
+                  href={form.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs text-primary hover:underline truncate flex-1"
+                >
+                  {form.pdfUrl.split('/').pop()}
+                </a>
+                <button type="button" onClick={removePdf} className="text-gray-500 hover:text-red-400 transition-colors">
+                  <FiX size={14} />
+                </button>
+              </div>
+            ) : pdfFile ? (
+              <div className="flex items-center gap-3 p-3 border border-primary/30 rounded bg-primary/5">
+                <FiPaperclip size={14} className="text-primary flex-shrink-0" />
+                <span className="font-mono text-xs text-gray-300 truncate flex-1">{pdfFile.name}</span>
+                <span className="font-mono text-xs text-gray-500">{(pdfFile.size / 1024).toFixed(0)} KB</span>
+                <button type="button" onClick={removePdf} className="text-gray-500 hover:text-red-400 transition-colors">
+                  <FiX size={14} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex items-center gap-2 px-4 py-3 border border-dashed border-border rounded cursor-pointer hover:border-primary/40 transition-colors w-fit">
+                <FiPaperclip size={14} className="text-gray-500" />
+                <span className="font-mono text-xs text-gray-500">Choose PDF file</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handlePdfSelect}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+
           <label className="flex items-center gap-2 font-mono text-xs text-gray-400 cursor-pointer w-fit">
             <input type="checkbox" checked={form.published} onChange={setCheck('published')} className="accent-primary w-3.5 h-3.5" />
             Publish immediately
           </label>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={loading} className="btn-primary disabled:opacity-50">
-              {loading ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
+            <button type="submit" disabled={loading || pdfUploading} className="btn-primary disabled:opacity-50">
+              {pdfUploading ? 'Uploading PDF...' : loading ? 'Saving...' : editing ? 'Update Post' : 'Create Post'}
             </button>
             {editing && (
               <button type="button" onClick={cancelEdit} className="btn-ghost">
