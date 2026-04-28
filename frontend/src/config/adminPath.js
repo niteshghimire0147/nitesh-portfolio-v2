@@ -1,6 +1,3 @@
-// The admin path is stored as char codes — the actual URL string never
-// appears as a literal anywhere in the source or built bundle.
+// Path is base64-encoded — decoded at runtime so the literal never appears in the bundle.
 const _r = import.meta.env.VITE_RP;
-export const ADMIN = _r
-  ? _r.split(',').map(Number).map(c => String.fromCharCode(c)).join('')
-  : 'admin'; // safe fallback — real security is JWT + 2FA, not path obscurity
+export const ADMIN = _r ? atob(_r) : 'admin';
