@@ -167,7 +167,7 @@ export default function ProjectsSection() {
 
         <div className="text-center mt-10">
           <a
-            href={`https://github.com/${GITHUB_USER}`}
+            href="https://github.com/niteshghimire0147"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary gap-2"
