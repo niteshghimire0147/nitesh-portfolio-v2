@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { FiGithub, FiExternalLink, FiCode, FiShield, FiBook, FiStar, FiGitBranch } from 'react-icons/fi';
 import api from '../../utils/api';
 
-const GITHUB_USER = 'niteshghimire0147';
-
 const STATIC = [
   { title: 'Gumbili Studio',         description: 'Image-to-cartoon converter app using Python image processing to stylise real photos into cartoon-style output.', techStack: ['Python','OpenCV','Flask'], category: 'Development',   githubUrl: 'https://github.com/niteshghimire0147', featured: true  },
   { title: 'Portfolio Website',       description: 'This portfolio — MERN stack + Vite + Tailwind CSS with a full CMS to manage blog posts, CTF writeups and projects.', techStack: ['React','Node.js','MongoDB','Vite'], category: 'Development',   githubUrl: 'https://github.com/niteshghimire0147', featured: true  },
@@ -33,8 +31,8 @@ export default function ProjectsSection() {
       if (Array.isArray(r.data) && r.data.length) setProjects([...r.data, ...STATIC]);
     }).catch(() => {});
 
-    fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=30`)
-      .then((r) => r.json())
+    api.get('/github/repos')
+      .then((r) => r.data)
       .then((repos) => {
         if (!Array.isArray(repos)) return;
         const mapped = repos

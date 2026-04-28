@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 
 import authRoutes        from './routes/auth.js';
 import uploadRoutes      from './routes/upload.js';
+import githubRoutes      from './routes/github.js';
 import blogRoutes        from './routes/blog.js';
 import ctfRoutes         from './routes/ctf.js';
 import projectRoutes     from './routes/projects.js';
@@ -186,6 +187,7 @@ app.use('/uploads', express.static('uploads', { index: false }));
 app.use('/api/auth/login',   loginLimiter);
 app.use('/api/auth',         authRoutes);
 app.use('/api/upload',       uploadRoutes);
+app.use('/api/github',       githubRoutes);
 app.use('/api/blogs',        blogRoutes);
 app.use('/api/ctf',          ctfRoutes);
 app.use('/api/projects',     projectRoutes);
