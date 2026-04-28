@@ -114,6 +114,9 @@ bruno.json
 
 # ── 9. SECURITY RESEARCH / PENTEST ARTIFACTS ─────────────────────────────────
 # Never commit scan results or exploit scripts to a public portfolio repo
+SECURITY_DEV_REPORT.*
+*_REPORT.html
+*_REPORT.pdf
 *.nessus
 *.nmap
 nmap*.xml
@@ -195,6 +198,10 @@ Thumbs.db:encryptable
 desktop.ini
 $RECYCLE.BIN/
 *.lnk
+
+
+# ── 15b. CLAUDE CODE SESSION FILES ───────────────────────────────────────────
+.claude/
 
 
 # ── 16. EDITOR & IDE FILES ────────────────────────────────────────────────────

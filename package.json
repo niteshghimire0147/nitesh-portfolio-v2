@@ -3,10 +3,13 @@
   "version": "2.0.0",
   "description": "Nitesh Ghimire — MERN + Vite Portfolio with CMS (Bug-fixed v2)",
   "scripts": {
-    "install:all":    "cd backend && npm install && cd ../frontend && npm install",
-    "dev:backend":    "cd backend && npm run dev",
-    "dev:frontend":   "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
     "build:frontend": "cd frontend && npm run build"
   },
-  "author": "Nitesh Ghimire <ghimirenitesh8@gmail.com>"
+  "author": "Nitesh Ghimire <ghimirenitesh8@gmail.com>",
+  "devDependencies": {
+    "puppeteer": "^24.42.0"
+  }
 }

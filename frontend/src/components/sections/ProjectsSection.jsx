@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FiGithub, FiExternalLink, FiCode, FiShield, FiBook } from 'react-icons/fi';
+import { FiGithub, FiExternalLink, FiCode, FiShield, FiBook, FiStar, FiGitBranch } from 'react-icons/fi';
 import api from '../../utils/api';
+
+const GITHUB_USER = 'niteshghimire0147';
 
 const STATIC = [
   { title: 'Gumbili Studio',         description: 'Image-to-cartoon converter app using Python image processing to stylise real photos into cartoon-style output.', techStack: ['Python','OpenCV','Flask'], category: 'Development',   githubUrl: 'https://github.com/niteshghimire0147', featured: true  },
@@ -13,20 +15,54 @@ const STATIC = [
   { title: 'Krishi Guru App',         description: 'System improvement proposal for an agricultural advisory app focused on UX upgrades and feature additions for Nepali farmers.', techStack: ['System Design','UI/UX'], category: 'Academic',     featured: false },
 ];
 
-const CATS = ['All','Cybersecurity','Development','Academic'];
-const ICON = { Cybersecurity: FiShield, Development: FiCode, Academic: FiBook };
+const CATS = ['All', 'GitHub', 'Cybersecurity', 'Development', 'Academic'];
+const ICON = { Cybersecurity: FiShield, Development: FiCode, Academic: FiBook, GitHub: FiGithub };
+
+function toTitleCase(str) {
+  return str.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function ProjectsSection() {
-  const [projects, setProjects] = useState(STATIC);
-  const [filter,   setFilter]   = useState('All');
+  const [projects,       setProjects]       = useState(STATIC);
+  const [githubProjects, setGithubProjects] = useState([]);
+  const [filter,         setFilter]         = useState('All');
+  const [ghLoading,      setGhLoading]      = useState(true);
 
   useEffect(() => {
     api.get('/projects').then((r) => {
       if (Array.isArray(r.data) && r.data.length) setProjects([...r.data, ...STATIC]);
     }).catch(() => {});
+
+    fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=30`)
+      .then((r) => r.json())
+      .then((repos) => {
+        if (!Array.isArray(repos)) return;
+        const mapped = repos
+          .filter((r) => !r.fork && r.description)
+          .map((r) => ({
+            _id:        `gh-${r.id}`,
+            title:      toTitleCase(r.name),
+            description: r.description || '',
+            techStack:  r.language ? [r.language] : [],
+            category:   'GitHub',
+            githubUrl:  r.html_url,
+            liveUrl:    r.homepage || '',
+            featured:   r.stargazers_count > 0,
+            stars:      r.stargazers_count,
+            forks:      r.forks_count,
+          }));
+        setGithubProjects(mapped);
+      })
+      .catch(() => {})
+      .finally(() => setGhLoading(false));
   }, []);
 
-  const shown = filter === 'All' ? projects : projects.filter((p) => p.category === filter);
+  const allProjects = [...githubProjects, ...projects];
+  const shown = filter === 'All'
+    ? allProjects
+    : filter === 'GitHub'
+      ? githubProjects
+      : projects.filter((p) => p.category === filter);
 
   return (
     <section id="projects" className="py-24 px-6 relative z-10 bg-darker/40">
@@ -49,7 +85,16 @@ export default function ProjectsSection() {
                   : 'border-border text-gray-500 hover:border-primary/40 hover:text-gray-300'
               }`}
             >
-              {c}
+              {c === 'GitHub' ? (
+                <span className="flex items-center gap-1.5">
+                  <FiGithub size={11} /> GitHub
+                  {!ghLoading && githubProjects.length > 0 && (
+                    <span className="bg-primary/20 text-primary rounded-full px-1.5 text-[10px]">
+                      {githubProjects.length}
+                    </span>
+                  )}
+                </span>
+              ) : c}
             </button>
           ))}
         </div>
@@ -71,8 +116,19 @@ export default function ProjectsSection() {
                         ★ Featured
                       </span>
                     )}
+                    {p.category === 'GitHub' && (
+                      <span className="font-mono text-xs text-primary/60 border border-primary/20 bg-primary/5 px-2 py-0.5 rounded">
+                        GitHub
+                      </span>
+                    )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-3">
+                    {p.category === 'GitHub' && (
+                      <span className="flex items-center gap-1 font-mono text-xs text-gray-500">
+                        <FiStar size={11} /> {p.stars}
+                        <FiGitBranch size={11} className="ml-1" /> {p.forks}
+                      </span>
+                    )}
                     {p.githubUrl && (
                       <a href={p.githubUrl} target="_blank" rel="noopener noreferrer"
                         className="text-gray-600 hover:text-primary transition-colors">
@@ -105,9 +161,15 @@ export default function ProjectsSection() {
           })}
         </div>
 
+        {ghLoading && (
+          <p className="text-center font-mono text-xs text-gray-600 mt-6">
+            fetching github repos...
+          </p>
+        )}
+
         <div className="text-center mt-10">
           <a
-            href="https://github.com/niteshghimire0147"
+            href={`https://github.com/${GITHUB_USER}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary gap-2"
