@@ -14,23 +14,23 @@ function sanitizeUrl(url) {
 }
 
 function pickProjectFields(body) {
-  const { title, description, techStack, category, githubUrl, liveUrl, image, featured, order } = body;
+  const { title, description, techStack, category, githubUrl, liveUrl, image, featured, hidden, order } = body;
   return {
     title, description, techStack, category,
     githubUrl: sanitizeUrl(githubUrl),
     liveUrl:   sanitizeUrl(liveUrl),
     image:     sanitizeUrl(image),
-    featured, order,
+    featured, hidden, order,
   };
 }
 
-// GET /api/projects
+// GET /api/projects  — public (excludes deleted + hidden)
 router.get('/', async (req, res) => {
   try {
     const { category, page = 1, limit = 50 } = req.query;
     const safeLimit = Math.min(Math.max(parseInt(limit) || 50, 1), 100);
     const safePage  = Math.max(parseInt(page) || 1, 1);
-    const filter    = { deleted: { $ne: true } };
+    const filter    = { deleted: { $ne: true }, hidden: { $ne: true } };
     if (category) filter.category = category;
     const projects = await Project.find(filter)
       .sort({ featured: -1, order: 1, createdAt: -1 })
@@ -38,6 +38,32 @@ router.get('/', async (req, res) => {
       .limit(safeLimit)
       .lean();
     res.json(projects);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/projects/admin  — admin only (includes hidden AND deleted, for full management)
+router.get('/admin', protect, async (req, res) => {
+  try {
+    const projects = await Project.find({})
+      .sort({ featured: -1, order: 1, createdAt: -1 })
+      .lean();
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/projects/suppressed  — public, returns just titles of hidden or deleted projects
+// Frontend uses this to filter out static/GitHub items that have been suppressed via the CMS
+router.get('/suppressed', async (req, res) => {
+  try {
+    const suppressed = await Project.find(
+      { $or: [{ hidden: true }, { deleted: true }] },
+      { title: 1, _id: 0 }
+    ).lean();
+    res.json(suppressed.map((p) => p.title.toLowerCase().trim()));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

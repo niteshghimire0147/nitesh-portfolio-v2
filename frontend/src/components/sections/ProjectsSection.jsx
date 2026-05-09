@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiGithub, FiExternalLink, FiCode, FiShield, FiBook, FiStar, FiGitBranch } from 'react-icons/fi';
 import api from '../../utils/api';
-
-const STATIC = [
-  { title: 'Gumbili Studio',         description: 'Image-to-cartoon converter app using Python image processing to stylise real photos into cartoon-style output.', techStack: ['Python','OpenCV','Flask'], category: 'Development',   githubUrl: 'https://github.com/niteshghimire0147', featured: true  },
-  { title: 'Portfolio Website',       description: 'This portfolio — MERN stack + Vite + Tailwind CSS with a full CMS to manage blog posts, CTF writeups and projects.', techStack: ['React','Node.js','MongoDB','Vite'], category: 'Development',   githubUrl: 'https://github.com/niteshghimire0147', featured: true  },
-  { title: 'SQL Injection Lab',       description: 'Hands-on pentesting practice using SQLMap and manual techniques on deliberately vulnerable web apps in safe lab environments.', techStack: ['SQLMap','Kali Linux','Burp Suite'], category: 'Cybersecurity', featured: true  },
-  { title: 'TryHackMe PT Labs',       description: 'Completed Penetration Testing path — enumeration, exploitation, post-exploitation across diverse machines.', techStack: ['Nmap','Metasploit','Python','Linux'], category: 'Cybersecurity', featured: false },
-  { title: 'Hotel Booking System',    description: 'Full database design & implementation — ERD, normalisation, and complex SQL queries for a hotel management system.', techStack: ['SQL','ERD','MySQL'], category: 'Academic',     featured: false },
-  { title: 'Network Design — Cisco',  description: 'LAN/WAN design and simulation covering routing protocols, VLANs and network security policies in Cisco Packet Tracer.', techStack: ['Cisco PT','OSPF','VLANs'], category: 'Academic',     featured: false },
-  { title: 'AI in Logistics',         description: 'Group research project exploring AI applications in supply chain management with practical implementation proposals.', techStack: ['Python','AI/ML','Research'], category: 'Academic',     featured: false },
-  { title: 'Krishi Guru App',         description: 'System improvement proposal for an agricultural advisory app focused on UX upgrades and feature additions for Nepali farmers.', techStack: ['System Design','UI/UX'], category: 'Academic',     featured: false },
-];
+import { STATIC_PROJECTS as STATIC } from '../../data/staticProjects';
 
 const CATS = ['All', 'GitHub', 'Cybersecurity', 'Development', 'Academic'];
 const ICON = { Cybersecurity: FiShield, Development: FiCode, Academic: FiBook, GitHub: FiGithub };
@@ -20,17 +10,50 @@ function toTitleCase(str) {
   return str.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Sort: ★ featured first → by order → stable
+function sortProjects(arr) {
+  return [...arr].sort((a, b) => {
+    if (b.featured !== a.featured) return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    if ((a.order ?? 99) !== (b.order ?? 99)) return (a.order ?? 99) - (b.order ?? 99);
+    return 0;
+  });
+}
+
 export default function ProjectsSection() {
   const [projects,       setProjects]       = useState(STATIC);
   const [githubProjects, setGithubProjects] = useState([]);
+  const [suppressed,     setSuppressed]     = useState(new Set());
   const [filter,         setFilter]         = useState('All');
   const [ghLoading,      setGhLoading]      = useState(true);
 
   useEffect(() => {
-    api.get('/projects').then((r) => {
-      if (Array.isArray(r.data) && r.data.length) setProjects([...r.data, ...STATIC]);
-    }).catch(() => {});
+    // 1. Fetch suppressed titles (hidden or deleted in CMS)
+    let suppressedSet = new Set();
+    api.get('/projects/suppressed')
+      .then((r) => {
+        if (Array.isArray(r.data)) {
+          suppressedSet = new Set(r.data); // already lowercased from backend
+          setSuppressed(suppressedSet);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        // 2. Fetch visible CMS projects, then merge with filtered STATIC
+        api.get('/projects').then((r) => {
+          if (Array.isArray(r.data)) {
+            const dbTitles     = new Set(r.data.map((p) => p.title.toLowerCase().trim()));
+            // Only include static projects that are NOT in CMS at all
+            // (if they're in CMS, use the CMS version — visible ones are already in r.data)
+            const staticToShow = STATIC.filter(
+              (s) => !dbTitles.has(s.title.toLowerCase().trim()) &&
+                     !suppressedSet.has(s.title.toLowerCase().trim())
+            );
+            setProjects(sortProjects([...r.data, ...staticToShow]));
+          }
+        }).catch(() => {});
+      });
 
+    // 3. Fetch GitHub repos, filter suppressed ones
     api.get('/github/repos')
       .then((r) => r.data)
       .then((repos) => {
@@ -38,16 +61,16 @@ export default function ProjectsSection() {
         const mapped = repos
           .filter((r) => !r.fork && r.description)
           .map((r) => ({
-            _id:        `gh-${r.id}`,
-            title:      toTitleCase(r.name),
+            _id:         `gh-${r.id}`,
+            title:       toTitleCase(r.name),
             description: r.description || '',
-            techStack:  r.language ? [r.language] : [],
-            category:   'GitHub',
-            githubUrl:  r.html_url,
-            liveUrl:    r.homepage || '',
-            featured:   r.stargazers_count > 0,
-            stars:      r.stargazers_count,
-            forks:      r.forks_count,
+            techStack:   r.language ? [r.language] : [],
+            category:    'GitHub',
+            githubUrl:   r.html_url,
+            liveUrl:     r.homepage || '',
+            featured:    r.stargazers_count > 0,
+            stars:       r.stargazers_count,
+            forks:       r.forks_count,
           }));
         setGithubProjects(mapped);
       })
@@ -55,12 +78,17 @@ export default function ProjectsSection() {
       .finally(() => setGhLoading(false));
   }, []);
 
-  const allProjects = [...githubProjects, ...projects];
+  // Filter out suppressed GitHub repos at render time (suppressed loads async)
+  const visibleGithub = githubProjects.filter(
+    (r) => !suppressed.has(r.title.toLowerCase().trim())
+  );
+
+  const allProjects = sortProjects([...visibleGithub, ...projects]);
   const shown = filter === 'All'
     ? allProjects
     : filter === 'GitHub'
-      ? githubProjects
-      : projects.filter((p) => p.category === filter);
+      ? visibleGithub
+      : sortProjects(projects.filter((p) => p.category === filter));
 
   return (
     <section id="projects" className="py-24 px-6 relative z-10 bg-darker/40">
@@ -86,9 +114,9 @@ export default function ProjectsSection() {
               {c === 'GitHub' ? (
                 <span className="flex items-center gap-1.5">
                   <FiGithub size={11} /> GitHub
-                  {!ghLoading && githubProjects.length > 0 && (
+                  {!ghLoading && visibleGithub.length > 0 && (
                     <span className="bg-primary/20 text-primary rounded-full px-1.5 text-[10px]">
-                      {githubProjects.length}
+                      {visibleGithub.length}
                     </span>
                   )}
                 </span>

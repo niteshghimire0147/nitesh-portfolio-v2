@@ -106,17 +106,31 @@ export default function BlogPost() {
         </div>
 
         {blog.pdfUrl && (
-          <a
-            href={blog.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const res = await fetch(blog.pdfUrl);
+                if (!res.ok) throw new Error('Download failed');
+                const blob = await res.blob();
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = `${(blog.title || 'document').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch {
+                window.open(blog.pdfUrl, '_blank');
+              }
+            }}
             className="inline-flex items-center gap-2 mb-6 px-4 py-2.5 border border-primary/40
                        bg-primary/5 text-primary font-mono text-xs rounded hover:bg-primary/10
-                       transition-colors"
+                       transition-colors cursor-pointer"
           >
             <FiDownload size={13} /> Download PDF
-          </a>
+          </button>
         )}
 
         <div className="card prose-dark">

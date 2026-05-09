@@ -17,6 +17,7 @@ import BlogList             from './pages/BlogList';
 import BlogPost             from './pages/BlogPost';
 import CTFList              from './pages/CTFList';
 import CTFPost              from './pages/CTFPost';
+import NewsPage             from './pages/NewsPage';
 import NotFound             from './pages/NotFound';
 import SecurityDisclosure   from './pages/SecurityDisclosure';
 import PGPKey               from './pages/PGPKey';
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/blog/:slug"          element={<PublicLayout><BlogPost /></PublicLayout>} />
           <Route path="/ctf"                 element={<PublicLayout><CTFList /></PublicLayout>} />
           <Route path="/ctf/:slug"           element={<PublicLayout><CTFPost /></PublicLayout>} />
+          <Route path="/news"               element={<PublicLayout><NewsPage /></PublicLayout>} />
           <Route path="/security-disclosure" element={<PublicLayout><SecurityDisclosure /></PublicLayout>} />
           <Route path="/pgp"                 element={<PublicLayout><PGPKey /></PublicLayout>} />
 

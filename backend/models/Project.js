@@ -10,6 +10,7 @@ const projectSchema = new mongoose.Schema(
     liveUrl:     { type: String, default: '' },
     image:       { type: String, default: '' },
     featured:    { type: Boolean, default: false, index: true },
+    hidden:      { type: Boolean, default: false, index: true },
     order:       { type: Number, default: 0 },
     deleted:     { type: Boolean, default: false, index: true },
     deletedAt:   { type: Date, default: null },

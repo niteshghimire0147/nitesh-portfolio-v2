@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiFileText, FiFlag, FiFolder, FiMessageSquare, FiArrowRight } from 'react-icons/fi';
+import { ADMIN } from '../../config/adminPath';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../utils/api';
 
 const CARDS = [
-  { key: 'blogs',        label: 'Blog Posts',    icon: FiFileText,     href: '/admin/blogs',        color: '#00d4ff' },
-  { key: 'ctf',          label: 'CTF Writeups',  icon: FiFlag,         href: '/admin/ctf',          color: '#0066ff' },
-  { key: 'projects',     label: 'Projects',      icon: FiFolder,       href: '/admin/projects',     color: '#00ff88' },
-  { key: 'testimonials', label: 'Testimonials',  icon: FiMessageSquare,href: '/admin/testimonials', color: '#ff9900' },
+  { key: 'blogs',        label: 'Blog Posts',    icon: FiFileText,     href: `/${ADMIN}/blogs`,        color: '#00d4ff' },
+  { key: 'ctf',          label: 'CTF Writeups',  icon: FiFlag,         href: `/${ADMIN}/ctf`,          color: '#0066ff' },
+  { key: 'projects',     label: 'Projects',      icon: FiFolder,       href: `/${ADMIN}/projects`,     color: '#00ff88' },
+  { key: 'testimonials', label: 'Testimonials',  icon: FiMessageSquare,href: `/${ADMIN}/testimonials`, color: '#ff9900' },
 ];
 
 export default function AdminDashboard() {

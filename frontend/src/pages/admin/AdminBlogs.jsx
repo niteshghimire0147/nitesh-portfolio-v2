@@ -36,15 +36,47 @@ export default function AdminBlogs() {
   const handlePdfSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.type !== 'application/pdf') {
-      toast.error('Only PDF files are allowed.');
+
+    // Reset input immediately so rejected files never stay "selected"
+    const reset = () => { if (fileInputRef.current) fileInputRef.current.value = ''; };
+
+    // Layer 1: extension check
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'pdf') {
+      toast.error('Only .pdf files are allowed. Other file types are denied.');
+      reset();
       return;
     }
+
+    // Layer 2: MIME type check
+    if (file.type !== 'application/pdf') {
+      toast.error('Invalid file type. Only PDF files are allowed.');
+      reset();
+      return;
+    }
+
+    // Layer 3: size check
     if (file.size > 10 * 1024 * 1024) {
       toast.error('PDF must be under 10 MB.');
+      reset();
       return;
     }
-    setPdfFile(file);
+
+    // Layer 4: magic-byte check (%PDF) — catches renamed non-PDF files
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const bytes = new Uint8Array(ev.target.result);
+      const magic = [0x25, 0x50, 0x44, 0x46]; // %PDF
+      const isValid = bytes.length >= 4 && magic.every((b, i) => bytes[i] === b);
+      if (!isValid) {
+        toast.error('File is not a valid PDF. Upload denied.');
+        reset();
+        return;
+      }
+      setPdfFile(file);
+    };
+    reader.onerror = () => { toast.error('Could not read file.'); reset(); };
+    reader.readAsArrayBuffer(file.slice(0, 4)); // only read first 4 bytes
   };
 
   const removePdf = () => {

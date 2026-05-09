@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { href: '/#hall-of-fame',   label: 'Hall of Fame', section: 'hall-of-fame' },
   { href: '/blog',            label: 'Blog',         section: null },
   { href: '/ctf',             label: 'CTF',          section: null },
-  { href: '/#news',           label: 'News',         section: 'news' },
+  { href: '/news',            label: 'News',         section: null },
   { href: '/#contact',        label: 'Contact',      section: 'contact' },
 ];
 

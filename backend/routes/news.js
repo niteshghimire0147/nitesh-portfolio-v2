@@ -1,46 +1,95 @@
-import express        from 'express';
-import rateLimit      from 'express-rate-limit';
+import express   from 'express';
+import rateLimit from 'express-rate-limit';
+import Parser    from 'rss-parser';
 
 const router = express.Router();
+const parser = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'media'],
+      ['description',   'description'],
+    ],
+  },
+});
 
 const newsLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 min
-  max: 20,
+  windowMs: 10 * 60 * 1000,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many news requests. Try again later.' },
 });
 
-// 10-minute in-memory cache
+// 15-minute in-memory cache
 let cache = { data: null, at: 0 };
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 15 * 60 * 1000;
+
+// Feed sources
+const FEEDS = [
+  { url: 'https://feeds.feedburner.com/TheHackersNews',          source: 'The Hacker News' },
+  { url: 'https://www.paloaltonetworks.com/blog/feed/',           source: 'Palo Alto Networks' },
+];
+
+function stripHtml(str = '') {
+  return str.replace(/<[^>]*>/g, '').trim();
+}
+
+function extractImg(html = '') {
+  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return m ? m[1] : '';
+}
+
+async function fetchFeed({ url, source }) {
+  try {
+    const feed = await parser.parseURL(url);
+    return (feed.items || []).map((item) => ({
+      title:       item.title       || '',
+      link:        item.link        || '',
+      pubDate:     item.pubDate     || item.isoDate || '',
+      description: stripHtml(item.contentSnippet || item.description || '').slice(0, 300),
+      thumbnail:   item.media?.['$']?.url
+                   || item.enclosure?.url
+                   || extractImg(item['content:encoded'] || item.description || ''),
+      categories:  item.categories  || [],
+      source,
+    }));
+  } catch (err) {
+    console.error(`[NEWS] Failed to fetch ${source}:`, err.message);
+    return [];
+  }
+}
 
 // GET /api/news
 router.get('/', newsLimiter, async (req, res) => {
   try {
-    const apiKey = process.env.NEWS_API_KEY;
-    if (!apiKey) return res.status(200).json({ articles: [] });
-
     // Serve from cache if fresh
     if (cache.data && Date.now() - cache.at < CACHE_TTL_MS) {
       return res.json(cache.data);
     }
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
+    // Fetch all feeds in parallel
+    const results  = await Promise.all(FEEDS.map(fetchFeed));
+    const combined = results.flat();
 
-    const url = `https://newsapi.org/v2/everything?q=cybersecurity+penetration+testing&sortBy=publishedAt&pageSize=6&language=en&apiKey=${apiKey}`;
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
+    // Sort by date descending (newest first)
+    combined.sort((a, b) => {
+      const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+      const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+      return db - da;
+    });
 
-    const data = await response.json();
-    cache = { data, at: Date.now() };
-    res.json(data);
+    const payload = {
+      articles:   combined,
+      sources:    FEEDS.map((f) => f.source),
+      fetchedAt:  new Date().toISOString(),
+    };
+
+    cache = { data: payload, at: Date.now() };
+    res.json(payload);
   } catch (err) {
-    if (err.name === 'AbortError') {
-      return res.status(200).json({ articles: [] }); // upstream timeout — fail gracefully
-    }
-    res.status(200).json({ articles: [] });
+    console.error('[NEWS] Unexpected error:', err.message);
+    if (cache.data) return res.json({ ...cache.data, stale: true });
+    res.status(200).json({ articles: [], sources: [], error: 'Feed unavailable' });
   }
 });
 
