@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiEye, FiTag, FiSearch, FiX } from 'react-icons/fi';
 import api from '../utils/api';
+import { useSEO } from '../hooks/useSEO';
 
 function readingTime(content = '') {
   const words = content.trim().split(/\s+/).length;
@@ -9,6 +10,14 @@ function readingTime(content = '') {
 }
 
 export default function BlogList() {
+  useSEO({
+    title: 'Blog & Write-ups | Nitesh Ghimire',
+    description: 'Cybersecurity blog posts, vulnerability research, penetration testing write-ups, and security insights by Nitesh Ghimire.',
+    keywords: 'cybersecurity blog, penetration testing, web security, vulnerability research, Nepal hacker, ethical hacking',
+    canonical: 'https://niteshg.com.np/blog',
+    type: 'website',
+  });
+
   const [blogs,    setBlogs]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState('');

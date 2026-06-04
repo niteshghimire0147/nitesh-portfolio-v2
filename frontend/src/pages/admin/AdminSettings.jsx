@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { FiShield, FiSmartphone, FiKey, FiCheck, FiX } from 'react-icons/fi';
+import { useState, useEffect, useRef } from 'react';
+import {
+  FiShield, FiSmartphone, FiKey, FiCheck, FiX,
+  FiFileText, FiUpload, FiTrash2, FiLoader, FiDownload,
+} from 'react-icons/fi';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
@@ -12,9 +15,21 @@ export default function AdminSettings() {
   const [totpInput,   setTotpInput]   = useState('');
   const [loading,     setLoading]     = useState(false);
 
+  // Resume state
+  const [resume,          setResume]          = useState({ url: '', filename: '' });
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [resumeRemoving,  setResumeRemoving]  = useState(false);
+  const resumeInputRef = useRef(null);
+
   useEffect(() => {
     api.get('/auth/me').then(r => setUser(r.data)).catch(() => {});
+    // Load current resume URL from SiteConfig
+    api.get('/site-config').then(r => {
+      if (r.data?.resume) setResume(r.data.resume);
+    }).catch(() => {});
   }, []);
+
+  // ── 2FA ──────────────────────────────────────────────────────────────────────
 
   const startSetup = async () => {
     setLoading(true);
@@ -64,11 +79,172 @@ export default function AdminSettings() {
     }
   };
 
+  // ── Resume ───────────────────────────────────────────────────────────────────
+
+  const handleResumeFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'pdf') {
+      toast.error('Only PDF files are allowed for resume.');
+      return;
+    }
+
+    setResumeUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('pdf', file);
+      const { data } = await api.post('/upload/resume', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000,
+      });
+      setResume({ url: data.url, filename: data.filename });
+      toast.success('Resume uploaded successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Upload failed.');
+    } finally {
+      setResumeUploading(false);
+    }
+  };
+
+  const handleResumeRemove = async () => {
+    if (!window.confirm('Remove the current resume? This cannot be undone.')) return;
+    setResumeRemoving(true);
+    try {
+      await api.delete('/upload/resume');
+      setResume({ url: '', filename: '' });
+      toast.success('Resume removed.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Remove failed.');
+    } finally {
+      setResumeRemoving(false);
+    }
+  };
+
+  const hasResume = Boolean(resume?.url);
+
   return (
-    <AdminLayout title="Security Settings">
+    <AdminLayout title="Settings">
       <div className="max-w-xl space-y-6">
 
-        {/* 2FA Status card */}
+        {/* ── Resume Upload ── */}
+        <div className="card">
+          <h3 className="font-mono text-xs text-primary mb-5 tracking-widest flex items-center gap-2">
+            <FiFileText size={12} /> // RESUME
+          </h3>
+
+          {hasResume ? (
+            /* Current resume info */
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded border border-green-400/20 bg-green-400/5">
+                <div className="w-9 h-9 rounded border border-green-400/30 bg-green-400/10 flex items-center justify-center flex-shrink-0">
+                  <FiFileText size={16} className="text-green-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-mono text-xs text-green-400">● Resume active</p>
+                  <p className="font-mono text-xs text-gray-500 truncate mt-0.5">
+                    {resume.filename}
+                  </p>
+                </div>
+                <a
+                  href={resume.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-gray-500 hover:text-primary rounded transition-colors flex-shrink-0"
+                  title="Preview / Download"
+                >
+                  <FiDownload size={14} />
+                </a>
+              </div>
+
+              <div className="flex gap-3">
+                {/* Replace button */}
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="hidden"
+                  onChange={handleResumeFileChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={resumeUploading || resumeRemoving}
+                  className="btn-primary text-xs flex items-center gap-2 disabled:opacity-50"
+                >
+                  {resumeUploading ? (
+                    <><FiLoader size={13} className="animate-spin" /> Uploading…</>
+                  ) : (
+                    <><FiUpload size={13} /> Replace Resume</>
+                  )}
+                </button>
+
+                {/* Remove button */}
+                <button
+                  type="button"
+                  onClick={handleResumeRemove}
+                  disabled={resumeUploading || resumeRemoving}
+                  className="
+                    flex items-center gap-2 px-3 py-1.5 text-xs font-mono rounded border
+                    border-red-400/30 text-red-400/70
+                    hover:text-red-400 hover:border-red-400 hover:bg-red-400/5
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition-all duration-150
+                  "
+                >
+                  {resumeRemoving ? (
+                    <><FiLoader size={13} className="animate-spin" /> Removing…</>
+                  ) : (
+                    <><FiTrash2 size={13} /> Remove</>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* No resume yet */
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded border border-border bg-card">
+                <div className="w-9 h-9 rounded border border-border flex items-center justify-center flex-shrink-0">
+                  <FiFileText size={16} className="text-gray-600" />
+                </div>
+                <div>
+                  <p className="font-mono text-xs text-gray-500">○ No resume uploaded</p>
+                  <p className="font-mono text-xs text-gray-600 mt-0.5">
+                    Upload a PDF to make it downloadable on your portfolio
+                  </p>
+                </div>
+              </div>
+
+              <input
+                ref={resumeInputRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={handleResumeFileChange}
+              />
+              <button
+                type="button"
+                onClick={() => resumeInputRef.current?.click()}
+                disabled={resumeUploading}
+                className="btn-primary text-xs flex items-center gap-2 disabled:opacity-50"
+              >
+                {resumeUploading ? (
+                  <><FiLoader size={13} className="animate-spin" /> Uploading…</>
+                ) : (
+                  <><FiUpload size={13} /> Upload Resume (PDF)</>
+                )}
+              </button>
+            </div>
+          )}
+
+          <p className="mt-3 font-mono text-xs text-gray-600">
+            PDF only · max 10 MB · replaces any existing resume automatically
+          </p>
+        </div>
+
+        {/* ── 2FA Status card ── */}
         <div className="card">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -106,7 +282,7 @@ export default function AdminSettings() {
             )}
           </div>
 
-          {/* ── Setup: show QR code ── */}
+          {/* Setup: show QR code */}
           {step === 'setup' && (
             <div className="mt-6 pt-6 border-t border-border space-y-5">
               <div>
@@ -156,7 +332,7 @@ export default function AdminSettings() {
             </div>
           )}
 
-          {/* ── Disable: confirm TOTP ── */}
+          {/* Disable: confirm TOTP */}
           {step === 'disable' && (
             <form onSubmit={confirmDisable} className="mt-6 pt-6 border-t border-border space-y-4">
               <p className="font-mono text-xs text-primary tracking-widest">// CONFIRM DISABLE</p>
@@ -196,14 +372,14 @@ export default function AdminSettings() {
             <p><span className="text-primary">→</span> Session: httpOnly cookie (XSS-resistant), 7-day expiry</p>
             <p><span className="text-primary">→</span> Login: rate-limited to 5 attempts per 15 minutes per IP</p>
             <p><span className="text-primary">→</span> IPs blocked after 3 path traversal attempts (24h)</p>
-            <p><span className="text-primary">→</span> Security alerts sent to {' '}
+            <p><span className="text-primary">→</span> Security alerts sent to{' '}
               <span className="text-gray-400">{import.meta.env.VITE_ALERT_EMAIL || 'your email'}</span>
             </p>
             <p><span className="text-green-400">✓</span> 0 npm vulnerabilities (audited)</p>
           </div>
         </div>
 
-        {/* Key info */}
+        {/* Key / Account info */}
         <div className="card">
           <h3 className="font-mono text-xs text-primary mb-4 tracking-widest flex items-center gap-2">
             <FiKey size={12} /> // ACCOUNT

@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
 import { FiShield, FiMail, FiArrowLeft } from 'react-icons/fi';
+import { useSEO } from '../hooks/useSEO';
 
 export default function SecurityDisclosure() {
+  useSEO({
+    title: 'Responsible Disclosure Policy | Nitesh Ghimire',
+    description: 'Responsible disclosure policy (security.txt) for Nitesh Ghimire. Learn how to report vulnerabilities and get acknowledged.',
+    keywords: 'security.txt, responsible disclosure, bug bounty, vulnerability report, ethical hacking, Nepal',
+    canonical: 'https://niteshg.com.np/security-disclosure',
+    type: 'website',
+  });
+
   return (
     <div className="min-h-screen pt-24 pb-20 px-6 relative z-10">
       <div className="max-w-3xl mx-auto">
@@ -32,9 +41,9 @@ export default function SecurityDisclosure() {
           <pre className="font-mono text-sm text-gray-300 leading-8 whitespace-pre-wrap">
 {`Contact: mailto:ghimirenitesh8@gmail.com
 Preferred-Languages: en
-Policy: https://niteshghimire.dev/security-disclosure
-Acknowledgments: https://niteshghimire.dev/hall-of-fame
-Encryption: https://niteshghimire.dev/pgp`}
+Policy: https://niteshg.com.np/security-disclosure
+Acknowledgments: https://niteshg.com.np/hall-of-fame
+Encryption: https://niteshg.com.np/pgp`}
           </pre>
         </div>
 

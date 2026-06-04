@@ -8,16 +8,16 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
 
-import authRoutes        from './routes/auth.js';
-import uploadRoutes      from './routes/upload.js';
-import githubRoutes      from './routes/github.js';
-import blogRoutes        from './routes/blog.js';
-import ctfRoutes         from './routes/ctf.js';
-import projectRoutes     from './routes/projects.js';
+import authRoutes from './routes/auth.js';
+import uploadRoutes from './routes/upload.js';
+import githubRoutes from './routes/github.js';
+import blogRoutes from './routes/blog.js';
+import ctfRoutes from './routes/ctf.js';
+import projectRoutes from './routes/projects.js';
 import testimonialRoutes from './routes/testimonials.js';
-import contactRoutes     from './routes/contact.js';
-import newsRoutes        from './routes/news.js';
-import siteConfigRoutes  from './routes/siteConfig.js';
+import contactRoutes from './routes/contact.js';
+import newsRoutes from './routes/news.js';
+import siteConfigRoutes from './routes/siteConfig.js';
 
 import {
   blockBannedIPs,
@@ -34,7 +34,7 @@ dotenv.config();
 // ── Production env validation ─────────────────────────────────────────────
 if (process.env.NODE_ENV === 'production') {
   const required = ['JWT_SECRET', 'MONGO_URI', 'CLIENT_URL', 'NEWS_API_KEY'];
-  const missing  = required.filter(k => !process.env[k]);
+  const missing = required.filter(k => !process.env[k]);
   if (missing.length) {
     console.error(`❌  Missing required env vars in production: ${missing.join(', ')}`);
     process.exit(1);
@@ -99,16 +99,16 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc:      ["'self'"],
-        scriptSrc:       ["'self'"],
-        styleSrc:        ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        fontSrc:         ["'self'", 'https://fonts.gstatic.com', 'data:'],
-        imgSrc:          ["'self'", 'data:', 'https:'],
-        connectSrc:      ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
-        frameAncestors:  ["'none'"],
-        objectSrc:       ["'none'"],
-        baseUri:         ["'self'"],
-        formAction:      ["'self'"],
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
         upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
       },
     },
@@ -117,10 +117,10 @@ app.use(
       includeSubDomains: true,
       preload: true,
     },
-    noSniff:         true,
-    frameguard:      { action: 'deny' },
-    xssFilter:       true,
-    hidePoweredBy:   true,
+    noSniff: true,
+    frameguard: { action: 'deny' },
+    xssFilter: true,
+    hidePoweredBy: true,
     dnsPrefetchControl: { allow: false },
     crossOriginEmbedderPolicy: false, // relaxed to allow CDN fonts
   })
@@ -170,7 +170,7 @@ app.use(mongoSanitize({
 
 // ── NoSQL + input sanitization (auth + contact only) ─────────────────────
 
-app.use('/api/auth',    noSQLInjectionGuard, sanitizeInputs);
+app.use('/api/auth', noSQLInjectionGuard, sanitizeInputs);
 app.use('/api/contact', noSQLInjectionGuard, sanitizeInputs);
 
 // ── Global rate limit ─────────────────────────────────────────────────────
@@ -184,17 +184,17 @@ app.use('/uploads', express.static('uploads', { index: false }));
 // ── Routes ────────────────────────────────────────────────────────────────
 
 // loginLimiter must be registered BEFORE the auth router so it actually fires
-app.use('/api/auth/login',   loginLimiter);
-app.use('/api/auth',         authRoutes);
-app.use('/api/upload',       uploadRoutes);
-app.use('/api/github',       githubRoutes);
-app.use('/api/blogs',        blogRoutes);
-app.use('/api/ctf',          ctfRoutes);
-app.use('/api/projects',     projectRoutes);
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/github', githubRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/ctf', ctfRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api/testimonials', noSQLInjectionGuard, sanitizeInputs, testimonialRoutes);
-app.use('/api/contact',      noSQLInjectionGuard, sanitizeInputs, contactLimiter, contactRoutes);
-app.use('/api/news',         newsRoutes);
-app.use('/api/site-config',  siteConfigRoutes);
+app.use('/api/contact', noSQLInjectionGuard, sanitizeInputs, contactLimiter, contactRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/site-config', siteConfigRoutes);
 
 app.get('/api/health', (_req, res) =>
   res.json({ status: 'OK' })
@@ -210,10 +210,10 @@ app.get('/sitemap.xml', async (_req, res) => {
     ]);
     const [blogs, ctfs] = await Promise.all([
       Blog.find({ published: true, deleted: { $ne: true } }, 'slug updatedAt').lean(),
-      CTF.find(  { published: true, deleted: { $ne: true } }, 'slug updatedAt').lean(),
+      CTF.find({ published: true, deleted: { $ne: true } }, 'slug updatedAt').lean(),
     ]);
 
-    const base = process.env.CLIENT_URL || 'https://niteshghimire.dev';
+    const base = process.env.CLIENT_URL || 'https://niteshg.com.np';
     const url = (path, date) =>
       `  <url><loc>${base}${path}</loc>${date ? `<lastmod>${new Date(date).toISOString().split('T')[0]}</lastmod>` : ''}</url>`;
 
@@ -223,7 +223,7 @@ ${url('/', null)}
 ${url('/blog', null)}
 ${url('/ctf', null)}
 ${blogs.map(b => url(`/blog/${b.slug}`, b.updatedAt)).join('\n')}
-${ctfs.map(c  => url(`/ctf/${c.slug}`,  c.updatedAt)).join('\n')}
+${ctfs.map(c => url(`/ctf/${c.slug}`, c.updatedAt)).join('\n')}
 </urlset>`;
 
     res.header('Content-Type', 'application/xml').send(xml);

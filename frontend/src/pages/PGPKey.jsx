@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiCopy, FiCheck, FiKey } from 'react-icons/fi';
+import { useSEO } from '../hooks/useSEO';
 
 const PGP_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -13,7 +14,16 @@ Then: gpg --armor --export your@email.com]
 const FINGERPRINT = 'XXXX XXXX XXXX XXXX  XXXX XXXX XXXX XXXX XXXX XXXX';
 
 export default function PGPKey() {
+  useSEO({
+    title: 'PGP Public Key | Nitesh Ghimire',
+    description: 'Secure communication using PGP encryption. Import my public PGP key to send encrypted messages and vulnerability reports.',
+    keywords: 'PGP key, GPG, encryption, secure communication, cryptography, public key, Nepal',
+    canonical: 'https://niteshg.com.np/pgp',
+    type: 'website',
+  });
+
   const [copied, setCopied] = useState(false);
+
 
   const copy = async () => {
     await navigator.clipboard.writeText(PGP_KEY);

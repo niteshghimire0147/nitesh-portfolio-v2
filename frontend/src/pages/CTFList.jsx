@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiStar, FiSearch, FiX } from 'react-icons/fi';
 import api from '../utils/api';
+import { useSEO } from '../hooks/useSEO';
 
 const DIFF_CLASS = {
   Easy:   'badge-easy',
@@ -11,6 +12,14 @@ const DIFF_CLASS = {
 };
 
 export default function CTFList() {
+  useSEO({
+    title: 'CTF Write-ups | Nitesh Ghimire',
+    description: 'CTF competition write-ups covering web exploitation, binary exploitation, cryptography, OSINT, and forensics by Nitesh Ghimire.',
+    keywords: 'CTF writeups, TryHackMe, HackTheBox, capture the flag, web exploitation, cybersecurity challenges, Nepal',
+    canonical: 'https://niteshg.com.np/ctf',
+    type: 'website',
+  });
+
   const [ctfs,      setCtfs]      = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [platform,  setPlatform]  = useState('All');

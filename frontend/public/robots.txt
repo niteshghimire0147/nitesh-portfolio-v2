@@ -9,4 +9,5 @@ Allow: /pgp
 
 Disallow: /api/
 
-Sitemap: https://niteshghimire.dev/sitemap.xml
+Sitemap: https://niteshg.com.np/sitemap.xml
+

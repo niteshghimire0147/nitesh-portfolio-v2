@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FiExternalLink, FiCalendar, FiRefreshCw, FiShield, FiTag } from 'react-icons/fi';
 import api from '../utils/api';
+import { useSEO } from '../hooks/useSEO';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -21,7 +22,16 @@ function formatDate(dateStr) {
 }
 
 export default function NewsPage() {
+  useSEO({
+    title: 'Cybersecurity News & Threat Intel | Nitesh Ghimire',
+    description: 'Live security news and threat intelligence feed aggregating top stories from thehackernews.com and cyber security sources.',
+    keywords: 'cybersecurity news, threat intel, hacker news, security feed, vuln news, Nepal, ethical hacker',
+    canonical: 'https://niteshg.com.np/news',
+    type: 'website',
+  });
+
   const [articles,  setArticles]  = useState([]);
+
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
   const [fetchedAt, setFetchedAt] = useState('');

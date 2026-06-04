@@ -13,6 +13,7 @@ const ROLES = [
 export default function HeroSection() {
   const { config } = useSiteConfig();
   const { github, linkedin, hackthebox, tryhackme } = config.contact;
+  const resumeUrl = config.resume?.url || '';
   const [roleIdx, setRoleIdx] = useState(0);
   const [text, setText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -87,13 +88,16 @@ export default function HeroSection() {
           <a href="#contact" className="btn-primary gap-2">
             ./contact.sh
           </a>
-          <a
-            href="/NITESH_GHIMIRE-Resume.pdf"
-            download="NITESH_GHIMIRE-Resume.pdf"
-            className="btn-ghost gap-2"
-          >
-            <FiDownload size={15} /> Resume
-          </a>
+          {resumeUrl && (
+            <a
+              href={resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost gap-2"
+            >
+              <FiDownload size={15} /> Resume
+            </a>
+          )}
           {github && (
             <a href={github} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
               <FiGithub size={15} /> GitHub

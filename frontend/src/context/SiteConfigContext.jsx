@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../utils/api';
 
 export const DEFAULT_CONFIG = {
+  resume: { url: '', filename: '' },
   about: {
     name: 'Nitesh Ghimire', location: 'Bhaktapur, Nepal', education: 'B.Sc IT @ APU',
     focus: 'Penetration Testing', goal: 'Purple Team Operations',
@@ -174,6 +175,7 @@ function merge(api, def) {
       disclosures: api.hallOfFame?.disclosures?.length ? api.hallOfFame.disclosures : def.hallOfFame.disclosures,
     },
     arsenal: api.arsenal?.length ? api.arsenal : def.arsenal,
+    resume:  api.resume?.url ? api.resume : def.resume,
   };
 }
 

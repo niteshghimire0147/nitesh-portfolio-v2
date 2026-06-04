@@ -7,6 +7,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import { FiArrowLeft, FiStar, FiClock } from 'react-icons/fi';
 import api from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
+import { useSEO } from '../hooks/useSEO';
 
 const DIFF_COLOR = {
   Easy:   'text-green-400',
@@ -48,15 +49,27 @@ export default function CTFPost() {
   const [ctf,     setCtf]     = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useSEO({
+    title: ctf ? `${ctf.title} - CTF Writeup` : 'Loading CTF Writeup...',
+    description: ctf ? (ctf.excerpt || ctf.content?.slice(0, 160)) : 'Detailed CTF challenge walkthrough and exploitation analysis.',
+    keywords: ctf ? `ctf, writeup, ${ctf.platform}, ${ctf.category}, ${(ctf.tags || []).join(', ')}` : 'ctf, capture the flag, writeup, exploit',
+    canonical: `https://niteshg.com.np/ctf/${slug}`,
+    type: 'article',
+    article: ctf ? {
+      publishedTime: ctf.createdAt,
+      modifiedTime: ctf.updatedAt,
+      tags: ctf.tags,
+    } : undefined,
+  });
+
   useEffect(() => {
     api.get(`/ctf/${slug}`)
       .then((r) => {
         setCtf(r.data);
-        document.title = `${String(r.data.title || '').slice(0, 60)} | CTF | Nitesh Ghimire`;
       })
       .finally(() => setLoading(false));
-    return () => { document.title = 'Nitesh Ghimire | Cybersecurity Portfolio'; };
   }, [slug]);
+
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center pt-20">

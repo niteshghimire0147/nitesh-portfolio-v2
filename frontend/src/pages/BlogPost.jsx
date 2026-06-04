@@ -7,6 +7,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import { FiArrowLeft, FiCalendar, FiEye, FiTag, FiClock, FiDownload } from 'react-icons/fi';
 import api from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
+import { useSEO } from '../hooks/useSEO';
 
 function readingTime(content = '') {
   const words = content.trim().split(/\s+/).filter(Boolean).length;
@@ -41,15 +42,27 @@ export default function BlogPost() {
   const [blog,    setBlog]    = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useSEO({
+    title: blog ? blog.title : 'Loading Post...',
+    description: blog ? (blog.excerpt || blog.content?.slice(0, 160)) : 'Cybersecurity writeup and analysis.',
+    keywords: blog ? (blog.tags || []).join(', ') : 'cybersecurity, vulnerability, writeup',
+    canonical: `https://niteshg.com.np/blog/${slug}`,
+    type: 'article',
+    article: blog ? {
+      publishedTime: blog.createdAt,
+      modifiedTime: blog.updatedAt,
+      tags: blog.tags,
+    } : undefined,
+  });
+
   useEffect(() => {
     api.get(`/blogs/${slug}`)
       .then((r) => {
         setBlog(r.data);
-        document.title = `${String(r.data.title || '').slice(0, 60)} | Nitesh Ghimire`;
       })
       .finally(() => setLoading(false));
-    return () => { document.title = 'Nitesh Ghimire | Cybersecurity Portfolio'; };
   }, [slug]);
+
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center pt-20">

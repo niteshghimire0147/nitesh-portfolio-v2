@@ -10,8 +10,17 @@ import ArsenalSection        from '../components/sections/ArsenalSection';
 import TestimonialsSection   from '../components/sections/TestimonialsSection';
 import NewsSection           from '../components/sections/NewsSection';
 import ContactSection        from '../components/sections/ContactSection';
+import { useSEO }            from '../hooks/useSEO';
 
 export default function Home() {
+  useSEO({
+    title: 'Nitesh Ghimire | Penetration Tester & Security Researcher',
+    description: 'Portfolio of Nitesh Ghimire, a Penetration Tester, Security Researcher & Purple Team Operator based in Nepal. Explore CVEs, CTF write-ups, and security research.',
+    keywords: 'Nitesh Ghimire, penetration tester, security researcher, purple team, ethical hacker, Nepal, cybersecurity portfolio, CVE',
+    canonical: 'https://niteshg.com.np/',
+    type: 'website',
+  });
+
   return (
     <SiteConfigProvider>
       <main className="relative">

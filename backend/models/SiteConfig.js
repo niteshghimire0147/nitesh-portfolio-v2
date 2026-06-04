@@ -94,6 +94,10 @@ const siteConfigSchema = new mongoose.Schema(
         desc:   String,
       }],
     },
+    resume: {
+      url:      { type: String, default: '' },
+      filename: { type: String, default: '' },
+    },
   },
   { timestamps: true }
 );

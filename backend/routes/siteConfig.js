@@ -7,7 +7,7 @@ const router = express.Router();
 // Only these top-level keys are allowed in PUT — prevents arbitrary field injection
 const ALLOWED_KEYS = new Set([
   'about', 'skills', 'experience', 'certifications',
-  'contact', 'customNews', 'hallOfFame', 'arsenal',
+  'contact', 'customNews', 'hallOfFame', 'arsenal', 'resume',
 ]);
 
 // GET /api/site-config  — public
