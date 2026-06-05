@@ -35,6 +35,12 @@ const MD_COMPONENTS = {
     }
     return <CodeBlock className={className}>{children}</CodeBlock>;
   },
+  img({ src, alt, ...props }) {
+    const fixedSrc = typeof src === 'string' && src.startsWith('/uploads/')
+      ? src.replace(/^\/uploads\//, '/api/uploads/')
+      : src;
+    return <img src={fixedSrc} alt={alt} {...props} className="max-w-full h-auto rounded" />;
+  },
 };
 
 export default function BlogPost() {
