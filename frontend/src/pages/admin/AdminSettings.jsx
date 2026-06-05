@@ -21,11 +21,36 @@ export default function AdminSettings() {
   const [resumeRemoving,  setResumeRemoving]  = useState(false);
   const resumeInputRef = useRef(null);
 
+  // Opaque download endpoint — never exposes UUID filename
+  const downloadUrl = '/api/download/resume';
+
+  const handleResumeDownload = async (e) => {
+    e.preventDefault();
+    if (!resume?.filename && !resume?.url) return;
+    try {
+      const res = await fetch(downloadUrl);
+      if (!res.ok) throw new Error('fetch failed');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = resume.filename || 'resume.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   useEffect(() => {
     api.get('/auth/me').then(r => setUser(r.data)).catch(() => {});
     // Load current resume URL from SiteConfig
     api.get('/site-config').then(r => {
-      if (r.data?.resume) setResume(r.data.resume);
+      if (r.data?.resume) {
+        setResume(r.data.resume);
+      }
     }).catch(() => {});
   }, []);
 
@@ -123,7 +148,7 @@ export default function AdminSettings() {
     }
   };
 
-  const hasResume = Boolean(resume?.url);
+  const hasResume = Boolean(resume?.filename || resume?.url);
 
   return (
     <AdminLayout title="Settings">
@@ -148,15 +173,16 @@ export default function AdminSettings() {
                     {resume.filename}
                   </p>
                 </div>
-                <a
-                  href={resume.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 text-gray-500 hover:text-primary rounded transition-colors flex-shrink-0"
-                  title="Preview / Download"
-                >
-                  <FiDownload size={14} />
-                </a>
+                {resumeApiUrl && (
+                  <button
+                    type="button"
+                    onClick={handleResumeDownload}
+                    className="p-2 text-gray-500 hover:text-primary rounded transition-colors flex-shrink-0"
+                    title="Preview / Download"
+                  >
+                    <FiDownload size={14} />
+                  </button>
+                )}
               </div>
 
               <div className="flex gap-3">

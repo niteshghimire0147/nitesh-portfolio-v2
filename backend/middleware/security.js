@@ -161,14 +161,16 @@ export function commandInjectionGuard(req, res, next) {
 
 /** Add security headers not covered by helmet */
 export function extraSecurityHeaders(_req, res, next) {
-  res.setHeader('X-Content-Type-Options',            'nosniff');
-  res.setHeader('X-Frame-Options',                   'DENY');
-  res.setHeader('X-XSS-Protection',                  '0');  // CSP handles XSS now
-  res.setHeader('Referrer-Policy',                   'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy',                'camera=(), microphone=(), geolocation=(), payment=()');
-  res.setHeader('Cross-Origin-Opener-Policy',        'same-origin');
-  res.setHeader('Cross-Origin-Resource-Policy',      'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy',      'require-corp');
+  res.setHeader('X-Content-Type-Options',       'nosniff');
+  res.setHeader('X-Frame-Options',              'DENY');
+  res.setHeader('X-XSS-Protection',             '0');  // CSP handles XSS now
+  res.setHeader('Referrer-Policy',              'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy',           'camera=(), microphone=(), geolocation=(), payment=()');
+  res.setHeader('Cross-Origin-Opener-Policy',   'same-origin');
+  // CORP: same-site allows /api/uploads/ images to render in the same-origin frontend
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  // COEP: unsafe-none — 'require-corp' would block /api/uploads/ images that lack CORP headers
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
   res.removeHeader('X-Powered-By');
   res.removeHeader('Server');
   next();

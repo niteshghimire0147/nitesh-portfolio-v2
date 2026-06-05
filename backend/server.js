@@ -3,22 +3,27 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import path from 'path';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
+import { fileURLToPath } from 'url';
 
-import authRoutes from './routes/auth.js';
-import uploadRoutes from './routes/upload.js';
-import uploadFileRoutes from './routes/uploads.js';
-import githubRoutes from './routes/github.js';
-import blogRoutes from './routes/blog.js';
-import ctfRoutes from './routes/ctf.js';
-import projectRoutes from './routes/projects.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+import authRoutes        from './routes/auth.js';
+import uploadRoutes      from './routes/upload.js';  // handles /api/upload AND /api/download
+import uploadFileRoutes  from './routes/uploads.js';
+import githubRoutes      from './routes/github.js';
+import blogRoutes        from './routes/blog.js';
+import ctfRoutes         from './routes/ctf.js';
+import projectRoutes     from './routes/projects.js';
 import testimonialRoutes from './routes/testimonials.js';
-import contactRoutes from './routes/contact.js';
-import newsRoutes from './routes/news.js';
-import siteConfigRoutes from './routes/siteConfig.js';
+import contactRoutes     from './routes/contact.js';
+import newsRoutes        from './routes/news.js';
+import siteConfigRoutes  from './routes/siteConfig.js';
 
 import {
   blockBannedIPs,
@@ -169,34 +174,31 @@ app.use(mongoSanitize({
   },
 }));
 
-// ── NoSQL + input sanitization (auth + contact only) ─────────────────────
-
-app.use('/api/auth', noSQLInjectionGuard, sanitizeInputs);
-app.use('/api/contact', noSQLInjectionGuard, sanitizeInputs);
-
 // ── Global rate limit ─────────────────────────────────────────────────────
 
 app.use('/api', globalLimiter);
 
-// ── Static uploads (no directory listing) ────────────────────────────────
-
-app.use('/uploads', express.static('uploads', { index: false }));
+// ── Static uploads — absolute path so it works on live hosting ───────────
+// (relative './uploads' breaks when process CWD differs from project root)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { index: false }));
 
 // ── Routes ────────────────────────────────────────────────────────────────
 
 // loginLimiter must be registered BEFORE the auth router so it actually fires
-app.use('/api/auth/login', loginLimiter);
-app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/uploads', uploadFileRoutes);
-app.use('/api/github', githubRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/ctf', ctfRoutes);
-app.use('/api/projects', projectRoutes);
+app.use('/api/auth/login',   loginLimiter);
+app.use('/api/auth',         noSQLInjectionGuard, sanitizeInputs, authRoutes);
+app.use('/api/upload',       uploadRoutes);    // admin upload endpoints
+app.use('/api/download',     uploadRoutes);    // public opaque download (same router, /resume route)
+app.use('/api/uploads',      uploadFileRoutes);
+app.use('/api/github',       githubRoutes);
+// noSQLInjectionGuard on all write-capable public routes (OWASP A03)
+app.use('/api/blogs',        noSQLInjectionGuard, blogRoutes);
+app.use('/api/ctf',          noSQLInjectionGuard, ctfRoutes);
+app.use('/api/projects',     projectRoutes);
 app.use('/api/testimonials', noSQLInjectionGuard, sanitizeInputs, testimonialRoutes);
-app.use('/api/contact', noSQLInjectionGuard, sanitizeInputs, contactLimiter, contactRoutes);
-app.use('/api/news', newsRoutes);
-app.use('/api/site-config', siteConfigRoutes);
+app.use('/api/contact',      noSQLInjectionGuard, sanitizeInputs, contactLimiter, contactRoutes);
+app.use('/api/news',         newsRoutes);
+app.use('/api/site-config',  siteConfigRoutes);
 
 app.get('/api/health', (_req, res) =>
   res.json({ status: 'OK' })

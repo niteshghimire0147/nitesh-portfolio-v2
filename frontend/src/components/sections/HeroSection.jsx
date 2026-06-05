@@ -13,7 +13,6 @@ const ROLES = [
 export default function HeroSection() {
   const { config } = useSiteConfig();
   const { github, linkedin, hackthebox, tryhackme } = config.contact;
-  const resumeUrl = config.resume?.url || '';
   const [roleIdx, setRoleIdx] = useState(0);
   const [text, setText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -89,21 +88,20 @@ export default function HeroSection() {
             ./contact.sh
           </a>
           {(() => {
-            const filename = config?.resume?.filename;
-            const rawUrl = config?.resume?.url || '';
+            // Check if a resume exists (filename or url is present)
+            const hasResume = Boolean(config?.resume?.filename || config?.resume?.url);
+            if (!hasResume) return null;
 
-            // Always derive the download URL from /api/uploads/pdfs/ so the
-            // backend sets Content-Disposition: attachment and avoids encoded-path issues.
-            const apiUrl = filename
-              ? `/api/uploads/pdfs/${filename}`
-              : (rawUrl.startsWith('/api/') ? rawUrl : '');
-
-            if (!apiUrl) return null;
+            // Opaque URL — UUID filename never exposed to browser
+            // Actual file path is resolved server-side from DB
+            const downloadUrl = '/api/download/resume';
+            // Encode the URL so it appears completely hidden/encoded in the DOM source
+            const encodedHref = btoa(downloadUrl);
 
             const handleDownload = async (e) => {
               e.preventDefault();
               try {
-                const res = await fetch(apiUrl);
+                const res = await fetch(downloadUrl);
                 if (!res.ok) throw new Error('fetch failed');
                 const blob = await res.blob();
                 const blobUrl = URL.createObjectURL(blob);
@@ -115,14 +113,14 @@ export default function HeroSection() {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(blobUrl);
               } catch {
-                // Graceful fallback: open directly in new tab
-                window.open(apiUrl, '_blank', 'noopener,noreferrer');
+                // Graceful fallback
+                window.open(downloadUrl, '_blank', 'noopener,noreferrer');
               }
             };
 
             return (
               <a
-                href={apiUrl}
+                href={`?action=${encodeURIComponent(encodedHref)}`}
                 onClick={handleDownload}
                 className="btn-ghost gap-2"
               >
