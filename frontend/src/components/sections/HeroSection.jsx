@@ -88,16 +88,37 @@ export default function HeroSection() {
           <a href="#contact" className="btn-primary gap-2">
             ./contact.sh
           </a>
-          {resumeUrl && (
-            <a
-              href={resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-ghost gap-2"
-            >
-              <FiDownload size={15} /> Resume
-            </a>
-          )}
+          {(() => {
+            const url = resumeUrl;
+            const filename = config?.resume?.filename;
+
+            // If admin stored a frontend-static path like /NITESH_GHIMIRE-Resume.pdf,
+            // backend won’t serve it. Prefer the API uploads route when possible.
+            const needsApiFallback =
+              !url ||
+              (typeof url === 'string' && (
+                url.startsWith('/') &&
+                !url.startsWith('/api/')
+              ));
+
+            const fallback = filename
+              ? `/api/uploads/pdfs/${filename}`
+              : '';
+
+            const finalHref = needsApiFallback ? fallback : url;
+            if (!finalHref) return null;
+
+            return (
+              <a
+                href={finalHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost gap-2"
+              >
+                <FiDownload size={15} /> Resume
+              </a>
+            );
+          })()}
           {github && (
             <a href={github} target="_blank" rel="noopener noreferrer" className="btn-ghost gap-2">
               <FiGithub size={15} /> GitHub

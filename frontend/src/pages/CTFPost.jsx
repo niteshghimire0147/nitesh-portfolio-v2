@@ -43,9 +43,22 @@ const MD_COMPONENTS = {
     return <CodeBlock className={className}>{children}</CodeBlock>;
   },
   img({ src, alt, ...props }) {
-    const fixedSrc = typeof src === 'string' && src.startsWith('/uploads/')
-      ? src.replace(/^\/uploads\//, '/api/uploads/')
-      : src;
+    // Normalize markdown image paths so they always resolve through backend /api/uploads
+    // Supported forms:
+    //  - /uploads/...
+    //  - uploads/...
+    //  - ./uploads/...
+    let fixedSrc = src;
+    if (typeof src === 'string') {
+      if (src.startsWith('/uploads/')) {
+        fixedSrc = src.replace(/^\/uploads\//, '/api/uploads/');
+      } else if (src.startsWith('uploads/')) {
+        fixedSrc = src.replace(/^uploads\//, '/api/uploads/');
+      } else if (src.startsWith('./uploads/')) {
+        fixedSrc = src.replace(/^\.\/uploads\//, '/api/uploads/');
+      }
+    }
+
     return <img src={fixedSrc} alt={alt} {...props} className="max-w-full h-auto rounded" />;
   },
 };
