@@ -173,7 +173,7 @@ export default function AdminSettings() {
                     {resume.filename}
                   </p>
                 </div>
-                {resumeApiUrl && (
+                {downloadUrl && (
                   <button
                     type="button"
                     onClick={handleResumeDownload}
