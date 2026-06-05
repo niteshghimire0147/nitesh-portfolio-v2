@@ -159,6 +159,17 @@ export const DEFAULT_CONFIG = {
       ],
     },
   ],
+  seo: {
+    metaTitle: 'Nitesh Ghimire | Penetration Tester & Security Researcher',
+    metaDescription: 'Penetration Tester, Security Researcher & CTF Player from Nepal. CVEs, bug bounties, CTF write-ups, and cybersecurity insights.',
+    keywords: 'penetration testing, VAPT, CTF, bug bounty, security researcher, Nepal',
+    ogImage: 'https://niteshg.com.np/og-image.png',
+    twitterHandle: 'niteshghimire',
+    siteUrl: 'https://niteshg.com.np',
+    googleVerification: '',
+    bingVerification: '',
+    robotsIndex: true,
+  },
 };
 
 function merge(api, def) {
@@ -182,6 +193,8 @@ function merge(api, def) {
     },
     arsenal: api.arsenal?.length ? api.arsenal : def.arsenal,
     resume: api.resume?.url ? api.resume : def.resume,
+    // SEO settings from admin panel override defaults
+    seo: { ...def.seo, ...api.seo },
   };
 }
 

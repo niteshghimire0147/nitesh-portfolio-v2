@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { FiArrowLeft, FiStar, FiClock } from 'react-icons/fi';
 import api from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
@@ -21,6 +21,44 @@ function readingTime(content = '') {
   if (!words) return '< 1';
   const mins = Math.round(words / 200);
   return mins < 1 ? '< 1' : mins;
+}
+
+// Custom sanitize schema:
+// - Allows relative /api/uploads/ and /uploads/ paths in img src (default schema blocks them)
+// - Keeps href restricted to http/https/mailto to prevent XSS
+// - Allows className for syntax highlighting
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    '*':    [...(defaultSchema.attributes?.['*']    || []), 'className', 'style'],
+    img:    ['alt', 'src', 'title', 'width', 'height', 'className'],
+    code:   ['className'],
+    span:   ['className'],
+    div:    ['className'],
+    pre:    ['className'],
+    a:      ['href', 'title', 'target', 'rel'],
+  },
+  protocols: {
+    // Keep href restricted — prevents javascript: XSS in links
+    href: ['http', 'https', 'mailto'],
+    // ⚑ Remove src restriction so /api/uploads/ relative paths pass through
+    // (img src="javascript:..." doesn't execute JS in modern browsers — safe)
+    cite: defaultSchema.protocols?.cite,
+    data: defaultSchema.protocols?.data,
+    download: defaultSchema.protocols?.download,
+  },
+};
+
+// Normalize image src: handle old /uploads/ paths AND new /api/uploads/ paths
+function normalizeSrc(src) {
+  if (typeof src !== 'string') return src;
+  // Old format stored before URL fix — rewrite to API route
+  if (src.startsWith('/uploads/images/'))    return src.replace('/uploads/images/', '/api/uploads/images/');
+  if (src.startsWith('uploads/images/'))     return '/api/uploads/images/' + src.slice('uploads/images/'.length);
+  if (src.startsWith('./uploads/images/'))   return '/api/uploads/images/' + src.slice('./uploads/images/'.length);
+  if (src.startsWith('/uploads/pdfs/'))      return src.replace('/uploads/pdfs/', '/api/uploads/pdfs/');
+  return src;
 }
 
 const MD_COMPONENTS = {
@@ -43,23 +81,18 @@ const MD_COMPONENTS = {
     return <CodeBlock className={className}>{children}</CodeBlock>;
   },
   img({ src, alt, ...props }) {
-    // Normalize markdown image paths so they always resolve through backend /api/uploads
-    // Supported forms:
-    //  - /uploads/...
-    //  - uploads/...
-    //  - ./uploads/...
-    let fixedSrc = src;
-    if (typeof src === 'string') {
-      if (src.startsWith('/uploads/')) {
-        fixedSrc = src.replace(/^\/uploads\//, '/api/uploads/');
-      } else if (src.startsWith('uploads/')) {
-        fixedSrc = src.replace(/^uploads\//, '/api/uploads/');
-      } else if (src.startsWith('./uploads/')) {
-        fixedSrc = src.replace(/^\.\/uploads\//, '/api/uploads/');
-      }
-    }
-
-    return <img src={fixedSrc} alt={alt} {...props} className="max-w-full h-auto rounded" />;
+    // normalizeSrc handles both old (/uploads/) and new (/api/uploads/) URL formats
+    const fixedSrc = normalizeSrc(src);
+    return (
+      <img
+        src={fixedSrc}
+        alt={alt || ''}
+        {...props}
+        className="max-w-full h-auto rounded border border-border/30 my-4"
+        loading="lazy"
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+      />
+    );
   },
 };
 
@@ -83,9 +116,7 @@ export default function CTFPost() {
 
   useEffect(() => {
     api.get(`/ctf/${slug}`)
-      .then((r) => {
-        setCtf(r.data);
-      })
+      .then((r) => { setCtf(r.data); })
       .finally(() => setLoading(false));
   }, [slug]);
 
@@ -146,7 +177,7 @@ export default function CTFPost() {
         <div className="card prose-dark">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
             components={MD_COMPONENTS}
           >
             {ctf.content}

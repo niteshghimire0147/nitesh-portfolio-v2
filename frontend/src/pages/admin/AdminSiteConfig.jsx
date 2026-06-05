@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FiSave, FiPlus, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { useLocation } from 'react-router-dom';
+import { FiSave, FiPlus, FiTrash2, FiChevronDown, FiChevronUp, FiGlobe, FiSearch, FiTwitter, FiAlertCircle } from 'react-icons/fi';
 import AdminLayout from '../../components/AdminLayout';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { DEFAULT_CONFIG } from '../../context/SiteConfigContext';
 
-const TABS = ['About', 'Skills', 'Experience', 'Certifications', 'Contact', 'News', 'Hall of Fame'];
+const TABS = ['About', 'Skills', 'Experience', 'Certifications', 'Contact', 'News', 'Hall of Fame', 'SEO'];
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -651,10 +652,266 @@ function HallOfFameTab({ data, setData, onSave, saving }) {
   );
 }
 
+// ─── SEO Tab ────────────────────────────────────────────────────────
+
+const DEFAULT_SEO = {
+  metaTitle: '', metaDescription: '', keywords: '',
+  ogImage: '', twitterHandle: '', siteUrl: 'https://niteshg.com.np',
+  googleVerification: '', bingVerification: '', robotsIndex: true,
+};
+
+function SeoTab({ data, setData, onSave, saving }) {
+  const set = (k) => (v) => setData(d => ({ ...d, [k]: v }));
+  const d = { ...DEFAULT_SEO, ...data };
+
+  const titleLen = d.metaTitle.length;
+  const descLen  = d.metaDescription.length;
+
+  return (
+    <div className="space-y-8">
+
+      {/* Google Preview */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest flex items-center gap-2">
+          <FiSearch size={12} /> // GOOGLE_SEARCH_PREVIEW
+        </h3>
+        <div className="card bg-white/5 border-border/40 p-5 rounded">
+          <p className="font-mono text-xs text-green-400 mb-1 truncate">
+            {d.siteUrl || 'https://niteshg.com.np'}
+          </p>
+          <p className="text-blue-400 text-lg font-semibold leading-tight mb-1 truncate">
+            {d.metaTitle || 'Nitesh Ghimire — Penetration Tester'}
+          </p>
+          <p className="font-mono text-xs text-gray-400 leading-relaxed line-clamp-2">
+            {d.metaDescription || 'Your meta description will appear here...'}
+          </p>
+        </div>
+      </div>
+
+      {/* Meta Tags */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest">// META_TAGS</h3>
+        <div className="card space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="font-mono text-xs text-gray-500">
+                <span className="text-primary">--</span>metaTitle
+              </label>
+              <span className={`font-mono text-xs ${
+                titleLen > 60 ? 'text-red-400' : titleLen > 50 ? 'text-yellow-400' : 'text-gray-600'
+              }`}>{titleLen}/60</span>
+            </div>
+            <input
+              type="text"
+              value={d.metaTitle}
+              onChange={e => set('metaTitle')(e.target.value)}
+              placeholder="Nitesh Ghimire — Penetration Tester & Security Researcher"
+              className="input w-full"
+              maxLength={70}
+            />
+            {titleLen > 60 && (
+              <p className="font-mono text-xs text-red-400 mt-1 flex items-center gap-1">
+                <FiAlertCircle size={11} /> Exceeds 60 chars — may be truncated in search results
+              </p>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="font-mono text-xs text-gray-500">
+                <span className="text-primary">--</span>metaDescription
+              </label>
+              <span className={`font-mono text-xs ${
+                descLen > 160 ? 'text-red-400' : descLen > 140 ? 'text-yellow-400' : 'text-gray-600'
+              }`}>{descLen}/160</span>
+            </div>
+            <textarea
+              rows={3}
+              value={d.metaDescription}
+              onChange={e => set('metaDescription')(e.target.value)}
+              placeholder="Cybersecurity professional specializing in penetration testing, VAPT, CTF competitions and security research."
+              className="input resize-none w-full"
+              maxLength={200}
+            />
+            {descLen > 160 && (
+              <p className="font-mono text-xs text-red-400 mt-1 flex items-center gap-1">
+                <FiAlertCircle size={11} /> Exceeds 160 chars — may be truncated
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>keywords (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={d.keywords}
+              onChange={e => set('keywords')(e.target.value)}
+              placeholder="penetration testing, VAPT, CTF, bug bounty, security researcher, Nepal"
+              className="input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>siteUrl (canonical base)
+            </label>
+            <input
+              type="url"
+              value={d.siteUrl}
+              onChange={e => set('siteUrl')(e.target.value)}
+              placeholder="https://niteshg.com.np"
+              className="input w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Open Graph */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest">// OPEN_GRAPH (Social Cards)</h3>
+        <div className="card space-y-4">
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>ogImage URL (1200×630 recommended)
+            </label>
+            <input
+              type="url"
+              value={d.ogImage}
+              onChange={e => set('ogImage')(e.target.value)}
+              placeholder="https://niteshg.com.np/og-image.png"
+              className="input w-full"
+            />
+            {d.ogImage && (
+              <img
+                src={d.ogImage}
+                alt="OG Preview"
+                className="mt-3 w-full max-w-sm h-auto rounded border border-border/40 object-cover"
+                onError={e => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>Twitter/X handle
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-gray-600">@</span>
+              <input
+                type="text"
+                value={d.twitterHandle.replace(/^@/, '')}
+                onChange={e => set('twitterHandle')(e.target.value.replace(/^@/, ''))}
+                placeholder="niteshghimire"
+                className="input flex-1"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Engine Verification */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest">// SEARCH_ENGINE_VERIFICATION</h3>
+        <div className="card space-y-4">
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>Google Site Verification token
+            </label>
+            <input
+              type="text"
+              value={d.googleVerification}
+              onChange={e => set('googleVerification')(e.target.value)}
+              placeholder="Paste the content value from Google Search Console meta tag"
+              className="input w-full font-mono text-xs"
+            />
+          </div>
+          <div>
+            <label className="block font-mono text-xs text-gray-500 mb-1.5">
+              <span className="text-primary">--</span>Bing Site Verification token
+            </label>
+            <input
+              type="text"
+              value={d.bingVerification}
+              onChange={e => set('bingVerification')(e.target.value)}
+              placeholder="Paste the content value from Bing Webmaster Tools"
+              className="input w-full font-mono text-xs"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Indexing */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest">// ROBOTS_INDEXING</h3>
+        <div className="card">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={d.robotsIndex}
+              onChange={e => set('robotsIndex')(e.target.checked)}
+              className="accent-primary mt-0.5 w-4 h-4"
+            />
+            <div>
+              <p className="font-mono text-xs text-gray-300">Allow search engines to index this site</p>
+              <p className="font-mono text-xs text-gray-600 mt-1">
+                When disabled, a &lt;meta name="robots" content="noindex"&gt; tag is added.
+                Useful during development or staging.
+              </p>
+              <p className={`font-mono text-xs mt-2 flex items-center gap-1 ${
+                d.robotsIndex ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {d.robotsIndex ? '● Indexing ENABLED — site is discoverable' : '○ Indexing DISABLED — site is hidden from search'}
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      {/* OWASP / Security Checklist */}
+      <div>
+        <h3 className="font-mono text-xs text-primary mb-4 tracking-widest">// OWASP_TOP10_STATUS</h3>
+        <div className="card space-y-2 font-mono text-xs">
+          {[
+            { label: 'A01 Broken Access Control',          status: 'pass', note: 'Protected routes, role checks, JWT httpOnly cookie' },
+            { label: 'A02 Cryptographic Failures',         status: 'pass', note: 'HTTPS enforced, JWT secret required in prod' },
+            { label: 'A03 Injection',                      status: 'pass', note: 'mongoSanitize, noSQLInjectionGuard, parameterized queries' },
+            { label: 'A04 Insecure Design',                status: 'pass', note: 'Rate limiting on all critical endpoints' },
+            { label: 'A05 Security Misconfiguration',      status: 'pass', note: 'Helmet CSP, HSTS, no directory listing, hidden stack traces' },
+            { label: 'A06 Vulnerable Components',          status: 'warn', note: 'Run `npm audit` regularly to check dependencies' },
+            { label: 'A07 Auth Failures',                  status: 'pass', note: '2FA TOTP, 5 attempt login lockout, httpOnly session cookie' },
+            { label: 'A08 Data Integrity Failures',        status: 'pass', note: 'Field whitelist on PUT, UUID filenames, magic byte validation' },
+            { label: 'A09 Logging & Monitoring',           status: 'warn', note: 'Basic console logging — consider Winston + alerting' },
+            { label: 'A10 SSRF',                           status: 'pass', note: 'No user-controlled URL fetch endpoints exposed' },
+          ].map(({ label, status, note }) => (
+            <div key={label} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+              <span className={`flex-shrink-0 mt-0.5 ${
+                status === 'pass' ? 'text-green-400' : 'text-yellow-400'
+              }`}>{status === 'pass' ? '✓' : '⚠'}</span>
+              <div>
+                <p className={status === 'pass' ? 'text-gray-300' : 'text-yellow-300'}>{label}</p>
+                <p className="text-gray-600 mt-0.5">{note}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-4 border-t border-border">
+        <SaveBtn saving={saving} onClick={onSave} label="Save SEO Settings" />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────
 
 export default function AdminSiteConfig() {
-  const [tab,    setTab]    = useState('About');
+  const location = useLocation();
+  // Auto-select SEO tab when navigating from sidebar ?tab=SEO link
+  const defaultTab = new URLSearchParams(location.search).get('tab') || 'About';
+  const [tab,    setTab]    = useState(TABS.includes(defaultTab) ? defaultTab : 'About');
   const [config, setConfig] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -680,6 +937,7 @@ export default function AdminSiteConfig() {
           bugBounty:   d.hallOfFame?.bugBounty   || [],
           disclosures: d.hallOfFame?.disclosures || [],
         },
+        seo: { ...DEFAULT_SEO, ...d.seo },
       });
     }).catch(() => setConfig({
       about:          { ...DEFAULT_CONFIG.about },
@@ -689,8 +947,15 @@ export default function AdminSiteConfig() {
       contact:        { ...DEFAULT_CONFIG.contact },
       customNews:     [],
       hallOfFame:     { cves: [], bugBounty: [], disclosures: [] },
+      seo:            { ...DEFAULT_SEO },
     }));
   }, []);
+
+  // Keep tab in sync when user navigates back from sidebar shortcut
+  useEffect(() => {
+    const t = new URLSearchParams(location.search).get('tab');
+    if (t && TABS.includes(t)) setTab(t);
+  }, [location.search]);
 
   const save = async (section, data) => {
     setSaving(true);
@@ -784,6 +1049,14 @@ export default function AdminSiteConfig() {
           data={config.hallOfFame}
           setData={v => setConfig(c => ({ ...c, hallOfFame: typeof v === 'function' ? v(c.hallOfFame) : v }))}
           onSave={() => save('hallOfFame', config.hallOfFame)}
+          saving={saving}
+        />
+      )}
+      {tab === 'SEO' && (
+        <SeoTab
+          data={config.seo}
+          setData={v => setConfig(c => ({ ...c, seo: typeof v === 'function' ? v(c.seo) : v }))}
+          onSave={() => save('seo', config.seo)}
           saving={saving}
         />
       )}

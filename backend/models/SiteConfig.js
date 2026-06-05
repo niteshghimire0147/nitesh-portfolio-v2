@@ -98,6 +98,17 @@ const siteConfigSchema = new mongoose.Schema(
       url:      { type: String, default: '' },
       filename: { type: String, default: '' },
     },
+    seo: {
+      metaTitle:           { type: String, default: '' },
+      metaDescription:     { type: String, default: '' },
+      keywords:            { type: String, default: '' },
+      ogImage:             { type: String, default: '' },
+      twitterHandle:       { type: String, default: '' },
+      siteUrl:             { type: String, default: 'https://niteshg.com.np' },
+      googleVerification:  { type: String, default: '' },
+      bingVerification:    { type: String, default: '' },
+      robotsIndex:         { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );

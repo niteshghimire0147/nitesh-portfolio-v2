@@ -89,30 +89,41 @@ export default function HeroSection() {
             ./contact.sh
           </a>
           {(() => {
-            const url = resumeUrl;
             const filename = config?.resume?.filename;
+            const rawUrl = config?.resume?.url || '';
 
-            // If admin stored a frontend-static path like /NITESH_GHIMIRE-Resume.pdf,
-            // backend won’t serve it. Prefer the API uploads route when possible.
-            const needsApiFallback =
-              !url ||
-              (typeof url === 'string' && (
-                url.startsWith('/') &&
-                !url.startsWith('/api/')
-              ));
-
-            const fallback = filename
+            // Always derive the download URL from /api/uploads/pdfs/ so the
+            // backend sets Content-Disposition: attachment and avoids encoded-path issues.
+            const apiUrl = filename
               ? `/api/uploads/pdfs/${filename}`
-              : '';
+              : (rawUrl.startsWith('/api/') ? rawUrl : '');
 
-            const finalHref = needsApiFallback ? fallback : url;
-            if (!finalHref) return null;
+            if (!apiUrl) return null;
+
+            const handleDownload = async (e) => {
+              e.preventDefault();
+              try {
+                const res = await fetch(apiUrl);
+                if (!res.ok) throw new Error('fetch failed');
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = 'Nitesh_Ghimire_Resume.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+              } catch {
+                // Graceful fallback: open directly in new tab
+                window.open(apiUrl, '_blank', 'noopener,noreferrer');
+              }
+            };
 
             return (
               <a
-                href={finalHref}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={apiUrl}
+                onClick={handleDownload}
                 className="btn-ghost gap-2"
               >
                 <FiDownload size={15} /> Resume

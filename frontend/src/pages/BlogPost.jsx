@@ -3,11 +3,38 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { FiArrowLeft, FiCalendar, FiEye, FiTag, FiClock, FiDownload } from 'react-icons/fi';
 import api from '../utils/api';
 import CodeBlock from '../components/CodeBlock';
 import { useSEO } from '../hooks/useSEO';
+
+// Custom sanitize schema: allows /api/uploads/ relative paths in img src
+// (default schema only allows http/https which strips local upload images)
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    '*':  [...(defaultSchema.attributes?.['*']  || []), 'className', 'style'],
+    img:  ['alt', 'src', 'title', 'width', 'height', 'className'],
+    code: ['className'],
+    span: ['className'],
+    a:    ['href', 'title', 'target', 'rel'],
+  },
+  protocols: {
+    href: ['http', 'https', 'mailto'], // keep href restricted against XSS
+    cite: defaultSchema.protocols?.cite,
+    // src intentionally omitted — allows relative /api/uploads/ paths
+  },
+};
+
+function normalizeSrc(src) {
+  if (typeof src !== 'string') return src;
+  if (src.startsWith('/uploads/images/'))  return src.replace('/uploads/images/', '/api/uploads/images/');
+  if (src.startsWith('uploads/images/'))   return '/api/uploads/images/' + src.slice('uploads/images/'.length);
+  if (src.startsWith('./uploads/images/')) return '/api/uploads/images/' + src.slice('./uploads/images/'.length);
+  return src;
+}
 
 function readingTime(content = '') {
   const words = content.trim().split(/\s+/).filter(Boolean).length;
@@ -36,10 +63,17 @@ const MD_COMPONENTS = {
     return <CodeBlock className={className}>{children}</CodeBlock>;
   },
   img({ src, alt, ...props }) {
-    const fixedSrc = typeof src === 'string' && src.startsWith('/uploads/')
-      ? src.replace(/^\/uploads\//, '/api/uploads/')
-      : src;
-    return <img src={fixedSrc} alt={alt} {...props} className="max-w-full h-auto rounded" />;
+    const fixedSrc = normalizeSrc(src);
+    return (
+      <img
+        src={fixedSrc}
+        alt={alt || ''}
+        {...props}
+        className="max-w-full h-auto rounded border border-border/30 my-4"
+        loading="lazy"
+        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+      />
+    );
   },
 };
 
@@ -155,7 +189,7 @@ export default function BlogPost() {
         <div className="card prose-dark">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
             components={MD_COMPONENTS}
           >
             {blog.content}

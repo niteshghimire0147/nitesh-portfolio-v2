@@ -2,10 +2,15 @@ import multer from 'multer';
 import path   from 'path';
 import fs     from 'fs';
 import crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
 
 // ── PDF upload config ────────────────────────────────────────────────────────
 
-const PDF_UPLOAD_DIR = './uploads/pdfs';
+// Absolute paths — prevents CWD-relative failures on live hosting
+const PDF_UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'pdfs');
 const PDF_MAX_SIZE   = 10 * 1024 * 1024;                        // 10 MB
 const PDF_MAGIC      = Buffer.from([0x25, 0x50, 0x44, 0x46]);  // %PDF
 
@@ -54,7 +59,8 @@ export function handlePDFUpload(req, res, next) {
         console.error('[UPLOAD] write error:', writeErr.message);
         return res.status(500).json({ message: 'Failed to save file.' });
       }
-      req.uploadedPDF = { filename, url: `/uploads/pdfs/${filename}` };
+      // Use /api/uploads/ prefix so the API route handles serving (not express.static)
+      req.uploadedPDF = { filename, url: `/api/uploads/pdfs/${filename}` };
       next();
     });
   });
@@ -66,12 +72,14 @@ export function deletePDFFile(filename) {
     return false;
   }
   const filepath = path.join(PDF_UPLOAD_DIR, filename);
+  // Path traversal double-check: ensure resolved path stays within upload dir
+  if (!path.resolve(filepath).startsWith(path.resolve(PDF_UPLOAD_DIR))) return false;
   try { fs.unlinkSync(filepath); return true; } catch { return false; }
 }
 
 // ── Image upload config (PNG / JPG only) ─────────────────────────────────────
 
-const IMG_UPLOAD_DIR = './uploads/images';
+const IMG_UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'images');
 const IMG_MAX_SIZE   = 5 * 1024 * 1024; // 5 MB
 
 // Magic bytes for PNG and JPEG
@@ -130,7 +138,8 @@ export function handleImageUpload(req, res, next) {
         console.error('[UPLOAD] image write error:', writeErr.message);
         return res.status(500).json({ message: 'Failed to save image.' });
       }
-      req.uploadedImage = { filename, url: `/uploads/images/${filename}` };
+      // Use /api/uploads/ prefix so the API route handles serving
+      req.uploadedImage = { filename, url: `/api/uploads/images/${filename}` };
       next();
     });
   });
@@ -142,5 +151,7 @@ export function deleteImageFile(filename) {
     return false;
   }
   const filepath = path.join(IMG_UPLOAD_DIR, filename);
+  // Path traversal double-check
+  if (!path.resolve(filepath).startsWith(path.resolve(IMG_UPLOAD_DIR))) return false;
   try { fs.unlinkSync(filepath); return true; } catch { return false; }
 }

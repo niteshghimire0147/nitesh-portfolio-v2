@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiGrid, FiFileText, FiFlag, FiFolder, FiSettings,
-  FiMessageSquare, FiLogOut, FiShield, FiExternalLink, FiLock,
+  FiMessageSquare, FiLogOut, FiShield, FiExternalLink, FiLock, FiGlobe,
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { ADMIN } from '../config/adminPath';
@@ -9,6 +9,7 @@ import { ADMIN } from '../config/adminPath';
 const buildNav = (a) => [
   { href: `/${a}`,              label: 'Dashboard',    icon: FiGrid,          exact: true },
   { href: `/${a}/site-config`,  label: 'Site Config',  icon: FiSettings },
+  { href: `/${a}/site-config?tab=SEO`, label: 'SEO',  icon: FiGlobe },
   { href: `/${a}/blogs`,        label: 'Blogs',        icon: FiFileText },
   { href: `/${a}/ctf`,          label: 'CTF Writeups', icon: FiFlag },
   { href: `/${a}/projects`,     label: 'Projects',     icon: FiFolder },
