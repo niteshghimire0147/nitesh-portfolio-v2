@@ -95,8 +95,6 @@ export default function HeroSection() {
             // Opaque URL — UUID filename never exposed to browser
             // Actual file path is resolved server-side from DB
             const downloadUrl = '/api/download/resume';
-            // Encode the URL so it appears completely hidden/encoded in the DOM source
-            const encodedHref = btoa(downloadUrl);
 
             const handleDownload = async (e) => {
               e.preventDefault();
@@ -119,13 +117,13 @@ export default function HeroSection() {
             };
 
             return (
-              <a
-                href={`?action=${encodeURIComponent(encodedHref)}`}
+              <button
+                type="button"
                 onClick={handleDownload}
                 className="btn-ghost gap-2"
               >
                 <FiDownload size={15} /> Resume
-              </a>
+              </button>
             );
           })()}
           {github && (
